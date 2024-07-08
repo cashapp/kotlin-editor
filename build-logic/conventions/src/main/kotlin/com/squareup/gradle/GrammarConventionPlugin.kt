@@ -70,7 +70,9 @@ public class GrammarConventionPlugin : Plugin<Project> {
     // TODO(tsr): There is probably a better way to do this.
     // Even though we're excluding the token files from the source jar, we still need to specify the
     // task dependency to satisfy Gradle.
-    tasks.named("sourcesJar", Jar::class.java) { t ->
+    // nb: the sourcesJar task must be getting added in an afterEvaluate from the mavenPublish
+    // plugin, so I have to use this lazy approach to configure it.
+    tasks.withType(Jar::class.java).named { it == "sourcesJar" }.configureEach { t ->
       t.dependsOn(copyAntlrTokens)
       t.exclude("**/*.tokens")
     }

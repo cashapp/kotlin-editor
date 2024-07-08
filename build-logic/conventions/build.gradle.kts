@@ -29,6 +29,7 @@ dependencies {
   implementation(libs.dependencyAnalysisPlugin)
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinGradlePluginApi)
+  implementation(libs.mavenPublish)
 
   testImplementation(libs.assertj)
   testImplementation(libs.junit.jupiter.api)

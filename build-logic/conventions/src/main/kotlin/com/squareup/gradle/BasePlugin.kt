@@ -1,10 +1,9 @@
 package com.squareup.gradle
 
 import com.squareup.gradle.utils.DependencyCatalog
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
@@ -16,13 +15,13 @@ internal class BasePlugin(private val project: Project) {
   fun apply(): Unit = project.run {
     pluginManager.run {
       apply("java-library")
-      apply("maven-publish")
+      apply("com.vanniktech.maven.publish")
       apply("com.autonomousapps.dependency-analysis")
     }
 
-    group = "app.cash.gradle-kotlin"
-    // TODO(tsr): not sure if this versioning strategy will work for OSS context.
-    version = providers.systemProperty("publish_version").orElse("unversioned").get()
+    // See gradle.properties
+    group = providers.gradleProperty("GROUP").get()
+    version = providers.gradleProperty("VERSION").get()
 
     configureJvmTarget()
     configurePublishing()
@@ -46,31 +45,35 @@ internal class BasePlugin(private val project: Project) {
     }
   }
 
-  // TODO(tsr): currently publishing to internal Artifactory. Must migrate code when we migrate repo
-  //  to squareup OSS space.
   private fun Project.configurePublishing() {
-    extensions.getByType(JavaPluginExtension::class.java).run {
-      withSourcesJar()
-    }
+    extensions.getByType(MavenPublishBaseExtension::class.java).run {
+      publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
+      signAllPublications()
 
-    val username = providers.systemProperty("publish_username").orElse("")
-    val password = providers.systemProperty("publish_password").orElse("")
+      pom { p ->
+        p.name.set(project.name)
+        p.description.set("A library for parsing, rewriting, and linting Kotlin source code")
+        p.inceptionYear.set("2024")
+        p.url.set("https://github.com/cashapp/kotlin-editor")
 
-    extensions.getByType(PublishingExtension::class.java).run {
-      publications { pubs ->
-        pubs.create("library", MavenPublication::class.java) { pub ->
-          pub.from(components.getAt("java"))
-        }
-      }
-
-      repositories { repos ->
-        repos.maven { repo ->
-          repo.name = "artifactory"
-          repo.url = uri("TODO(tsr)")
-          repo.credentials { credentials ->
-            credentials.username = username.get()
-            credentials.password = password.get()
+        p.licenses { licenses ->
+          licenses.license { l ->
+            l.name.set("The Apache Software License, Version 2.0")
+            l.url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            l.distribution.set("repo")
           }
+        }
+        p.developers { devs ->
+          devs.developer { d ->
+            d.id.set("cashapp")
+            d.name.set("Cash App")
+            d.url.set("https://github.com/cashapp")
+          }
+        }
+        p.scm { scm ->
+          scm.url.set("https://github.com/cashapp/kotlin-editor")
+          scm.connection.set("scm:git:git://github.com/cashapp/kotlin-editor.git")
+          scm.developerConnection.set("scm:git:ssh://git@github.com/cashapp/kotlin-editor.git")
         }
       }
     }

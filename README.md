@@ -31,15 +31,16 @@ source set to make the IDE experience better.
 
 ### The recipes
 
-All the recipes are in the `recipes` directory. It is not necessary for a recipe to be hosted in
-this repo; it can be in another repo, with the necessary dependencies from _this_ repo.
+Some sample recipes are in the `recipes` directory. Feel free to contribute new recipes if you 
+believe them to be generally useful; otherwise, simply treat this library as a normal dependency for
+your own projects.
 
 ## Contributing
 
-### Applications
+### Applications (Recipes)
 
 The grammar (see below) is simply the foundation on which we will build applications. These 
-a take the parse trees and "do something" with them. The two _categories_ of application are
+take the parse trees and "do something" with them. The two _categories_ of application are
 **linting** and **rewriting in place**.
 
 Applications of the grammar are in the `recipes/` directory. At time of writing, there are several
