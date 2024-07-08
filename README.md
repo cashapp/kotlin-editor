@@ -1,4 +1,6 @@
-![Main](https://github.com/cashapp/kotlin-editor/actions/workflows/push.yml/badge.svg)
+![release](https://img.shields.io/maven-central/v/app.cash.kotlin-editor/core?label=release&color=blue)  
+![snapshot](https://img.shields.io/nexus/s/app.cash.kotlin-editor/core?server=https%3A%2F%2Foss.sonatype.org&label=snapshot)   
+![main](https://github.com/cashapp/kotlin-editor/actions/workflows/push.yml/badge.svg)
 
 # KotlinEditor
 
