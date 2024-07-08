@@ -1,5 +1,5 @@
 # KotlinEditor
 
-## Version 0.37.0
+## Version 0.1
 
-TODO.
+First OSS release.

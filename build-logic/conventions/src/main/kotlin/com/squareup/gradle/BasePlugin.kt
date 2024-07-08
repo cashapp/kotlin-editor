@@ -77,9 +77,5 @@ internal class BasePlugin(private val project: Project) {
         }
       }
     }
-
-    tasks.named { it == "publishToMavenCentral" }.configureEach { t ->
-      t.notCompatibleWithConfigurationCache("Publishing is incompatible")
-    }
   }
 }

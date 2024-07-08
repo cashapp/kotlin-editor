@@ -1,8 +1,5 @@
 Release procedure for KotlinEditor
 
-TODO(tsr): add Github Actions pipelines.
-TODO(tsr): update publishing code to follow current Square OSS best practices.
-
 1. Update CHANGELOG
 1. Update README if needed
 1. Bump version number in `gradle.properties` to next stable version (removing the `-SNAPSHOT` suffix).
