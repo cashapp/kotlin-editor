@@ -1,3 +1,5 @@
+![Main](https://github.com/cashapp/kotlin-editor/actions/workflows/push.yml/badge.svg)
+
 # KotlinEditor
 
 A library for parsing Kotlin source code into a [parse tree](https://en.wikipedia.org/wiki/Parse_tree) 
