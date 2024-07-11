@@ -1,6 +1,5 @@
 plugins {
-  alias(libs.plugins.kotlin.jvm) apply false
-  alias(libs.plugins.dependencyAnalysis)
+  id("com.autonomousapps.dependency-analysis")
 }
 
 // https://github.com/autonomousapps/dependency-analysis-gradle-plugin/wiki
