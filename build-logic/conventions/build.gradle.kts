@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  `java-gradle-plugin`
+  id("java-gradle-plugin")
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.dependencyAnalysis)
 }
@@ -16,6 +16,10 @@ gradlePlugin {
       id = "cash.grammar"
       implementationClass = "com.squareup.gradle.GrammarConventionPlugin"
     }
+    create("settings") {
+      id = "cash.settings"
+      implementationClass = "com.squareup.gradle.SettingsPlugin"
+    }
   }
 }
 
@@ -27,6 +31,7 @@ dependencies {
   api(libs.kotlinStdLib)
 
   implementation(libs.dependencyAnalysisPlugin)
+  implementation(libs.develocityPlugin)
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinGradlePluginApi)
   implementation(libs.mavenPublish)

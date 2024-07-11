@@ -10,25 +10,16 @@ pluginManagement {
 }
 
 plugins {
-  id("com.gradle.develocity") version "3.17.1"
+  // Keep this version in sync with version catalog
+  id("com.gradle.develocity") version "3.17.5"
   id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+  id("cash.settings")
 }
 
 dependencyResolutionManagement {
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
     mavenCentral()
-  }
-}
-
-// TODO(tsr): build scans
-//  1. note this is publishing to the public scans server
-//  2. make it possible to opt-in to build scan publication
-develocity {
-  buildScan {
-    termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
-    termsOfUseAgree = "yes"
-    publishing.onlyIf { false }
   }
 }
 

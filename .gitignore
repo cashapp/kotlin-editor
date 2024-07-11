@@ -8,3 +8,5 @@ grammar/src/main/gen/
 
 # Ignore IDE files
 .idea/
+
+local.properties
