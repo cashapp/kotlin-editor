@@ -1,6 +1,7 @@
 package cash.grammar.kotlindsl.utils
 
 import com.squareup.cash.grammar.KotlinLexer
+import com.squareup.cash.grammar.KotlinParser.KotlinFileContext
 import com.squareup.cash.grammar.KotlinParser.ScriptContext
 import com.squareup.cash.grammar.KotlinParser.SemiContext
 import org.antlr.v4.runtime.CommonTokenStream
@@ -118,6 +119,17 @@ public object Whitespace {
    * Use this in conjunction with [trimGently] to maintain original end-of-file formatting.
    */
   public fun countTerminalNewlines(ctx: ScriptContext, tokens: CommonTokenStream): Int {
+    return countTerminalNewlines(ctx as ParserRuleContext, tokens)
+  }
+
+  /**
+   * Use this in conjunction with [trimGently] to maintain original end-of-file formatting.
+   */
+  public fun countTerminalNewlines(ctx: KotlinFileContext, tokens: CommonTokenStream): Int {
+    return countTerminalNewlines(ctx as ParserRuleContext, tokens)
+  }
+
+  private fun countTerminalNewlines(ctx: ParserRuleContext, tokens: CommonTokenStream): Int {
     return ctx.children
       // Start iterating from EOF
       .reversed()
