@@ -104,10 +104,10 @@ internal class WhitespaceTest {
   @Test fun `gets trailing newlines for kotlin file`() {
     val file =
       """
-        |class Foo {
-        |}
-        |
-      """.trimMargin()
+        class Foo {
+        }
+        
+      """.trimIndent()
 
     val scriptListener = Parser(
       file = file.byteInputStream(),
