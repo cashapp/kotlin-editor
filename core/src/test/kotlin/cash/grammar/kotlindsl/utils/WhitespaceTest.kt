@@ -12,7 +12,6 @@ import org.antlr.v4.runtime.Token
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.Test
-import java.nio.file.Files
 
 internal class WhitespaceTest {
 
@@ -103,15 +102,15 @@ internal class WhitespaceTest {
   }
 
   @Test fun `gets trailing newlines for kotlin file`() {
-    val buildScript =
+    val file =
       """
-        class Foo {
-        }
-        
-      """.trimIndent()
+        |class Foo {
+        |}
+        |
+      """.trimMargin()
 
     val scriptListener = Parser(
-      file = buildScript.byteInputStream(),
+      file = file.byteInputStream(),
       errorListener = TestErrorListener {
         throw RuntimeException("Syntax error: ${it?.message}", it)
       },
