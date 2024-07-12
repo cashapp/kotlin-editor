@@ -2,7 +2,7 @@ package cash.recipes.plugins
 
 import cash.grammar.kotlindsl.model.Plugin
 import cash.grammar.kotlindsl.model.Plugin.Type
-import cash.grammar.kotlindsl.parse.BuildScriptParseException
+import cash.grammar.kotlindsl.parse.KotlinParseException
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.parse.Rewriter
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
@@ -72,10 +72,10 @@ public class PluginNormalizer private constructor(
   // Is this an empty script?
   private var empty = true
 
-  @Throws(BuildScriptParseException::class)
+  @Throws(KotlinParseException::class)
   public fun rewritten(): String {
     errorListener.getErrorMessages().ifNotEmpty {
-      throw BuildScriptParseException.withErrors(it)
+      throw KotlinParseException.withErrors(it)
     }
 
     return rewriter.text.trimGently(terminalNewlines)

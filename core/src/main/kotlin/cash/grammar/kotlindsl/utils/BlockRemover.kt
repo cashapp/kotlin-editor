@@ -1,7 +1,7 @@
 package cash.grammar.kotlindsl.utils
 
 import cash.grammar.kotlindsl.model.RemovableBlock
-import cash.grammar.kotlindsl.parse.BuildScriptParseException
+import cash.grammar.kotlindsl.parse.KotlinParseException
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.parse.Rewriter
 import cash.grammar.kotlindsl.utils.Whitespace.trimGently
@@ -28,10 +28,10 @@ public class BlockRemover private constructor(
   private val rewriter = Rewriter(tokens)
   private var terminalNewlines = 0
 
-  @Throws(BuildScriptParseException::class)
+  @Throws(KotlinParseException::class)
   public fun rewritten(): String {
     errorListener.getErrorMessages().ifNotEmpty {
-      throw BuildScriptParseException.withErrors(it)
+      throw KotlinParseException.withErrors(it)
     }
 
     return rewriter.text.trimGently(terminalNewlines)
