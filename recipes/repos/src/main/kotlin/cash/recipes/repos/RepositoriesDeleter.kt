@@ -1,6 +1,6 @@
 package cash.recipes.repos
 
-import cash.grammar.kotlindsl.parse.BuildScriptParseException
+import cash.grammar.kotlindsl.parse.KotlinParseException
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.parse.Rewriter
 import cash.grammar.kotlindsl.utils.Blocks
@@ -66,10 +66,10 @@ public class RepositoriesDeleter private constructor(
   private var terminalNewlines = 0
   private val blockStack = ArrayDeque<NamedBlockContext>()
 
-  @Throws(BuildScriptParseException::class)
+  @Throws(KotlinParseException::class)
   public fun rewritten(): String {
     errorListener.getErrorMessages().ifNotEmpty {
-      throw BuildScriptParseException.withErrors(it)
+      throw KotlinParseException.withErrors(it)
     }
 
     return rewriter.text.trimGently(terminalNewlines)

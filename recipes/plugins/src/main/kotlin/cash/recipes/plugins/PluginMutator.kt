@@ -1,7 +1,7 @@
 package cash.recipes.plugins
 
 import cash.grammar.kotlindsl.model.Plugin
-import cash.grammar.kotlindsl.parse.BuildScriptParseException
+import cash.grammar.kotlindsl.parse.KotlinParseException
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.parse.Rewriter
 import cash.grammar.kotlindsl.utils.Blocks.isPlugins
@@ -37,7 +37,7 @@ import java.nio.file.Path
  *
  * @throws NonNormalizedScriptException if the script has not been normalized.
  * @throws IllegalArgumentException if conflicting plugins are found in both the pluginsToAdd and pluginsToRemove sets.
- * @throws BuildScriptParseException if the script cannot be parsed.
+ * @throws KotlinParseException if the script cannot be parsed.
  */
 public class PluginMutator private constructor(
   private val tokens: CommonTokenStream,
@@ -57,10 +57,10 @@ public class PluginMutator private constructor(
 
   public fun getPluginIds(): Set<String> = pluginIds
 
-  @Throws(BuildScriptParseException::class, NonNormalizedScriptException::class)
+  @Throws(KotlinParseException::class, NonNormalizedScriptException::class)
   public fun rewritten(): String {
     errorListener.getErrorMessages().ifNotEmpty {
-      throw BuildScriptParseException.withErrors(it)
+      throw KotlinParseException.withErrors(it)
     }
 
     return rewriter.text.trimGently(terminalNewlines)
