@@ -67,7 +67,7 @@ public class PluginNormalizer private constructor(
   private var pluginsBlock: NamedBlockContext? = null
 
   private val smartIndent = SmartIndent(tokens)
-  private var terminalNewlines = 0
+  private val terminalNewlines = Whitespace.countTerminalNewlines(tokens)
 
   // Is this an empty script?
   private var empty = true
@@ -79,10 +79,6 @@ public class PluginNormalizer private constructor(
     }
 
     return rewriter.text.trimGently(terminalNewlines)
-  }
-
-  override fun enterScript(ctx: ScriptContext) {
-    terminalNewlines = Whitespace.countTerminalNewlines(ctx, tokens)
   }
 
   override fun enterStatement(ctx: StatementContext) {

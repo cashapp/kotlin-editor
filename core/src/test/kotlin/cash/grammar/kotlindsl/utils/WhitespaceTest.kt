@@ -127,16 +127,8 @@ internal class WhitespaceTest {
 
     var newlines: List<Token>? = null
     var whitespace: List<Token>? = null
-    var trailingBuildscriptNewlines = 0
-    var trailingKotlinFileNewlines = 0
-
-    override fun enterScript(ctx: KotlinParser.ScriptContext) {
-      trailingBuildscriptNewlines = Whitespace.countTerminalNewlines(ctx, tokens)
-    }
-
-    override fun enterKotlinFile(ctx: KotlinParser.KotlinFileContext) {
-      trailingKotlinFileNewlines = Whitespace.countTerminalNewlines(ctx, tokens)
-    }
+    val trailingBuildscriptNewlines = Whitespace.countTerminalNewlines(tokens)
+    val trailingKotlinFileNewlines = Whitespace.countTerminalNewlines(tokens)
 
     override fun exitNamedBlock(ctx: NamedBlockContext) {
       if (ctx.isSubprojects) {
