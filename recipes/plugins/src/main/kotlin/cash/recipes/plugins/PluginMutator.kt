@@ -48,7 +48,7 @@ public class PluginMutator private constructor(
 
   private val rewriter = Rewriter(tokens)
   private val smartIndent = SmartIndent(tokens)
-  private var terminalNewlines = 0
+  private val terminalNewlines = Whitespace.countTerminalNewlines(tokens)
 
   private val blockStack = ArrayDeque<NamedBlockContext>()
   private var pluginsBlock: NamedBlockContext? = null
@@ -64,10 +64,6 @@ public class PluginMutator private constructor(
     }
 
     return rewriter.text.trimGently(terminalNewlines)
-  }
-
-  override fun enterScript(ctx: ScriptContext) {
-    terminalNewlines = Whitespace.countTerminalNewlines(ctx, tokens)
   }
 
   override fun enterNamedBlock(ctx: NamedBlockContext) {

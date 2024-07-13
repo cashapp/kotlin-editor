@@ -23,10 +23,10 @@ public class BlockRemover private constructor(
   private val tokens: CommonTokenStream,
   private val errorListener: CollectingErrorListener,
   private val blocksToRemove: Set<RemovableBlock>
-): KotlinParserBaseListener() {
+) : KotlinParserBaseListener() {
 
   private val rewriter = Rewriter(tokens)
-  private var terminalNewlines = 0
+  private val terminalNewlines = Whitespace.countTerminalNewlines(tokens)
 
   @Throws(KotlinParseException::class)
   public fun rewritten(): String {
@@ -35,10 +35,6 @@ public class BlockRemover private constructor(
     }
 
     return rewriter.text.trimGently(terminalNewlines)
-  }
-
-  override fun enterScript(ctx: KotlinParser.ScriptContext) {
-    terminalNewlines = Whitespace.countTerminalNewlines(ctx, tokens)
   }
 
   override fun exitNamedBlock(ctx: KotlinParser.NamedBlockContext) {
@@ -53,19 +49,27 @@ public class BlockRemover private constructor(
   }
 
   override fun exitPostfixUnaryExpression(ctx: KotlinParser.PostfixUnaryExpressionContext) {
-    val tasksWithTypeToRemove = blocksToRemove.filterIsInstance<RemovableBlock.TaskWithTypeBlock>().map { it.type }.toSet()
-    val inTasksWithType = ctx.primaryExpression()?.simpleIdentifier()?.text == "tasks" && ctx.postfixUnarySuffix(0)?.navigationSuffix()?.simpleIdentifier()?.text == "withType"
+    val tasksWithTypeToRemove =
+      blocksToRemove.filterIsInstance<RemovableBlock.TaskWithTypeBlock>().map { it.type }.toSet()
+    val inTasksWithType =
+      ctx.primaryExpression()?.simpleIdentifier()?.text == "tasks" && ctx.postfixUnarySuffix(0)
+        ?.navigationSuffix()?.simpleIdentifier()?.text == "withType"
 
     if (inTasksWithType) {
       removeWithType(ctx, tasksWithTypeToRemove)
     }
   }
 
-  private fun removeWithType(ctx: KotlinParser.PostfixUnaryExpressionContext, typeNames: Set<String>) {
+  private fun removeWithType(
+    ctx: KotlinParser.PostfixUnaryExpressionContext,
+    typeNames: Set<String>
+  ) {
     // tasks.withType<TypeName>
-    val kotlinDSLType = ctx.postfixUnarySuffix(1)?.typeArguments()?.typeProjection()?.singleOrNull()?.type()?.text
+    val kotlinDSLType =
+      ctx.postfixUnarySuffix(1)?.typeArguments()?.typeProjection()?.singleOrNull()?.type()?.text
     // tasks.withType(TypeName)
-    val groovyDSLType = ctx.postfixUnarySuffix(1)?.callSuffix()?.valueArguments()?.valueArgument()?.singleOrNull()?.text
+    val groovyDSLType = ctx.postfixUnarySuffix(1)?.callSuffix()?.valueArguments()?.valueArgument()
+      ?.singleOrNull()?.text
 
     if (kotlinDSLType in typeNames || groovyDSLType in typeNames) {
       rewriter.delete(ctx.start, ctx.stop)

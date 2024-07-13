@@ -12,7 +12,6 @@ import cash.grammar.kotlindsl.utils.Whitespace.trimGently
 import cash.grammar.utils.ifNotEmpty
 import com.squareup.cash.grammar.KotlinParser
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
-import com.squareup.cash.grammar.KotlinParser.ScriptContext
 import com.squareup.cash.grammar.KotlinParserBaseListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
@@ -63,7 +62,7 @@ public class RepositoriesDeleter private constructor(
 ) : KotlinParserBaseListener() {
 
   private val rewriter = Rewriter(tokens)
-  private var terminalNewlines = 0
+  private val terminalNewlines = Whitespace.countTerminalNewlines(tokens)
   private val blockStack = ArrayDeque<NamedBlockContext>()
 
   @Throws(KotlinParseException::class)
@@ -73,10 +72,6 @@ public class RepositoriesDeleter private constructor(
     }
 
     return rewriter.text.trimGently(terminalNewlines)
-  }
-
-  override fun enterScript(ctx: ScriptContext) {
-    terminalNewlines = Whitespace.countTerminalNewlines(ctx, tokens)
   }
 
   override fun enterNamedBlock(ctx: NamedBlockContext) {

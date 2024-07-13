@@ -1,14 +1,9 @@
 package cash.grammar.kotlindsl.utils
 
 import com.squareup.cash.grammar.KotlinLexer
-import com.squareup.cash.grammar.KotlinParser.KotlinFileContext
-import com.squareup.cash.grammar.KotlinParser.ScriptContext
-import com.squareup.cash.grammar.KotlinParser.SemiContext
-import com.squareup.cash.grammar.KotlinParser.SemisContext
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
-import org.antlr.v4.runtime.tree.ParseTree
 
 /**
  * Utilities for working with whitespace, including newlines, carriage returns, etc.
@@ -120,66 +115,16 @@ public object Whitespace {
   /**
    * Use this in conjunction with [trimGently] to maintain original end-of-file formatting.
    */
-  public fun countTerminalNewlines(ctx: ScriptContext, tokens: CommonTokenStream): Int {
-    return ctx.children
-      // Start iterating from EOF
-      .reversed()
-      .asSequence()
-      // Drop `EOF` (every file must have this)
-      .drop(1)
-      // Take only the "semis", which is a semi-colon or a newline, followed by 0 or more newlines
-      .takeWhile { parseTree ->
-        parseTree.javaClass == SemiContext::class.java && hasNoComments(parseTree, tokens)
-      }
-      // Note this is a `SemiContext` (singular!)
-      .filterIsInstance<SemiContext>()
-      // This is the "a newline, followed by 0 or more newlines"
-      .flatMap { it.NL() }
-      .count()
-  }
+  public fun countTerminalNewlines(tokens: CommonTokenStream): Int {
+    var count = 0
 
-  /**
-   * Use this in conjunction with [trimGently] to maintain original end-of-file formatting.
-   */
-  public fun countTerminalNewlines(ctx: KotlinFileContext, tokens: CommonTokenStream): Int {
-    return ctx.children
-      // Start iterating from EOF
-      .reversed()
-      .asSequence()
-      // Drop `EOF` (every file must have this)
-      .drop(1)
-      .filterIsInstance<ParserRuleContext>()
-      // We need to reverse the order of the children too. If a node doesn't have children, use it.
-      .flatMap { it.children?.reversed() ?: listOf(it) }
-      // Take only the "semis", which is a semi-colon or a newline, followed by 0 or more newlines
-      .takeWhile { parseTree ->
-        parseTree.javaClass == SemisContext::class.java && hasNoComments(parseTree, tokens)
-      }
-      // Note this is a `SemisContext` (plural!)
-      .filterIsInstance<SemisContext>()
-      // This is the "a newline, followed by 0 or more newlines"
-      .flatMap { it.NL() }
-      .count()
-  }
-
-  /**
-   * Because comments are not part of the parse tree (they are shunted to a "hidden" channel),
-   * we need to check for them. Otherwise, we'll "detect" too many newlines at the end of a
-   * file, when that file has only comments and newlines at the end.
-   */
-  private fun hasNoComments(parseTree: ParseTree, tokens: CommonTokenStream): Boolean {
-    return if (parseTree is ParserRuleContext) {
-      val toLeft = parseTree.stop?.let { stop ->
-        tokens.getHiddenTokensToLeft(stop.tokenIndex).orEmpty().isEmpty()
-      } ?: true
-      val toRight = parseTree.stop?.let { stop ->
-        tokens.getHiddenTokensToRight(stop.tokenIndex).orEmpty().isEmpty()
-      } ?: true
-
-      toLeft && toRight
-    } else {
-      true
+    // We use size - 2 because we skip the EOF token, which always exists.
+    for (i in tokens.size() - 2 downTo 0) {
+      val t = tokens.get(i)
+      if (t.type == KotlinLexer.NL) count++
+      else break
     }
+    return count
   }
 
   /**
