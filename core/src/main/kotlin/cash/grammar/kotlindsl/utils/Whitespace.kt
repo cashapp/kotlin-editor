@@ -1,9 +1,11 @@
 package cash.grammar.kotlindsl.utils
 
 import com.squareup.cash.grammar.KotlinLexer
+import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.misc.Interval
 
 /**
  * Utilities for working with whitespace, including newlines, carriage returns, etc.
@@ -110,6 +112,45 @@ public object Whitespace {
    */
   public fun getWhitespaceToRight(tokens: CommonTokenStream, before: Token): List<Token>? {
     return tokens.getHiddenTokensToRight(before.tokenIndex, KotlinLexer.WHITESPACE)
+  }
+
+  /**
+   * Returns the indentation in this input, based on the assumption that the first indentation
+   * discovered is the common indent level. If no indent discovered (which could happen if this
+   * input contains only top-level statements), defaults to [min].
+   */
+  public fun computeIndent(
+    tokens: CommonTokenStream,
+    input: CharStream,
+    min: String = "  ",
+  ): String {
+    // We need at least two tokens for this to make sense.
+    if (tokens.size() < 2) return min
+
+    val start = tokens.get(0).startIndex
+    val stop = tokens.get(tokens.size() - 1).stopIndex
+
+    if (start == -1 || stop == -1) return min
+
+    // Kind of a gross implementation, but a starting point that works -- can optimize later.
+    input.getText(Interval.of(start, stop)).lineSequence().forEach { line ->
+      var indent = ""
+      // a line might contain JUST whitespace -- we don't want to count these.
+      var nonEmptyLine = false
+
+      for (c in line.toCharArray()) {
+        if (c == ' ' || c == '\t') {
+          indent += c
+        } else {
+          nonEmptyLine = true
+          break
+        }
+      }
+
+      if (nonEmptyLine && indent.isNotEmpty()) return indent
+    }
+
+    return min
   }
 
   /**
