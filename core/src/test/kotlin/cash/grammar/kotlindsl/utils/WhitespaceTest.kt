@@ -4,14 +4,16 @@ import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isSubprojects
 import cash.grammar.kotlindsl.utils.test.TestErrorListener
-import com.squareup.cash.grammar.KotlinParser
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
 import com.squareup.cash.grammar.KotlinParserBaseListener
+import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 
 internal class WhitespaceTest {
 
@@ -34,7 +36,7 @@ internal class WhitespaceTest {
       errorListener = TestErrorListener {
         throw RuntimeException("Syntax error: ${it?.message}", it)
       },
-      listenerFactory = { _, tokens, _ -> TestListener(tokens) }
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
     ).listener()
 
     // There are two newlines preceding the 'subprojects' block
@@ -64,7 +66,7 @@ internal class WhitespaceTest {
       errorListener = TestErrorListener {
         throw RuntimeException("Syntax error: ${it?.message}", it)
       },
-      listenerFactory = { _, tokens, _ -> TestListener(tokens) }
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
     ).listener()
 
     // There are two spaces preceding the 'buildscript' block (on the same line)
@@ -95,7 +97,7 @@ internal class WhitespaceTest {
       errorListener = TestErrorListener {
         throw RuntimeException("Syntax error: ${it?.message}", it)
       },
-      listenerFactory = { _, tokens, _ -> TestListener(tokens) }
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
     ).listener()
 
     assertThat(scriptListener.trailingBuildscriptNewlines).isEqualTo(1)
@@ -115,20 +117,101 @@ internal class WhitespaceTest {
         throw RuntimeException("Syntax error: ${it?.message}", it)
       },
       startRule = { parser -> parser.kotlinFile() },
-      listenerFactory = { _, tokens, _ -> TestListener(tokens) }
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
     ).listener()
 
     assertThat(scriptListener.trailingKotlinFileNewlines).isEqualTo(1)
   }
 
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("indentationCases")
+  fun `can discover indentation`(testCase: TestCase) {
+    val parser = Parser(
+      file = testCase.sourceText,
+      errorListener = TestErrorListener {
+        throw RuntimeException("Syntax error: ${it?.message}", it)
+      },
+      listenerFactory = { input, tokens, _ ->
+        TestListener(
+          input = input,
+          tokens = tokens,
+          defaultIndent = testCase.defaultIndent,
+        )
+      }
+    ).listener()
+
+    assertThat(parser.indent).isEqualTo(testCase.expectedIndent)
+  }
+
+  private companion object {
+    @JvmStatic fun indentationCases() = listOf(
+      TestCase(
+        displayName = "two spaces",
+        sourceText = """
+          plugins {
+            id("kotlin")
+          }
+        """.trimIndent(),
+        expectedIndent = "  ",
+      ),
+      TestCase(
+        displayName = "four spaces",
+        sourceText = """
+          plugins {
+              id("kotlin")
+          }
+        """.trimIndent(),
+        expectedIndent = "    ",
+      ),
+      TestCase(
+        displayName = "tab",
+        sourceText = "plugins {\n\tid(\"kotlin\")\n}",
+        expectedIndent = "\t",
+      ),
+      TestCase(
+        displayName = "mixed spaces and tab",
+        sourceText = "plugins {\n\t  id(\"kotlin\")\n}",
+        expectedIndent = "\t  ",
+      ),
+      TestCase(
+        displayName = "defaults to two spaces",
+        sourceText = """
+          package com.example
+          
+          class Foo
+        """.trimIndent(),
+        expectedIndent = "  ",
+      ),
+      TestCase(
+        displayName = "ignores empty lines",
+        // the line between `package...` and `class...` contains a single space -- don't count this
+        sourceText = "package com.example\n \nclass Foo",
+        expectedIndent = "  ",
+      ),
+      TestCase(
+        displayName = "can change default to tab",
+        sourceText = """
+          package com.example
+
+          class Foo
+        """.trimIndent(),
+        defaultIndent = "\t",
+        expectedIndent = "\t",
+      ),
+    )
+  }
+
   private class TestListener(
-    private val tokens: CommonTokenStream
+    private val input: CharStream,
+    private val tokens: CommonTokenStream,
+    private val defaultIndent: String = "  ",
   ) : KotlinParserBaseListener() {
 
     var newlines: List<Token>? = null
     var whitespace: List<Token>? = null
     val trailingBuildscriptNewlines = Whitespace.countTerminalNewlines(tokens)
     val trailingKotlinFileNewlines = Whitespace.countTerminalNewlines(tokens)
+    val indent = Whitespace.computeIndent(tokens, input, defaultIndent)
 
     override fun exitNamedBlock(ctx: NamedBlockContext) {
       if (ctx.isSubprojects) {
@@ -138,5 +221,14 @@ internal class WhitespaceTest {
         whitespace = Whitespace.getWhitespaceToLeft(tokens, ctx)
       }
     }
+  }
+
+  internal class TestCase(
+    val displayName: String,
+    val sourceText: String,
+    val defaultIndent: String = "  ",
+    val expectedIndent: String,
+  ) {
+    override fun toString(): String = displayName
   }
 }
