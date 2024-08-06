@@ -31,15 +31,55 @@ package cash.grammar.kotlindsl.model
  * terms, and can be one of three kinds. See [Capability].
  *
  * Finally we have [type], which tells us whether this dependency declaration is for an internal
- * project declaration or an external module declaration. See [Type] and
+ * project declaration, an external module declaration, or a local file dependency. See [Type] and
  * [ModuleDependency](https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/ModuleDependency.html).
  */
 public data class DependencyDeclaration(
   val configuration: String,
-  val identifier: String,
+  val identifier: Identifier,
   val capability: Capability,
   val type: Type,
+  val fullText: String,
+  val precedingComment: String? = null,
 ) {
+
+  public data class Identifier @JvmOverloads constructor(
+    public val path: String,
+    public val configuration: String? = null,
+    public val explicitPath: Boolean = false,
+  ) {
+
+    /**
+     * ```
+     * 1. "g:a:v"
+     * 2. path = "g:a:v"
+     * 3. path = "g:a:v", configuration = "foo"
+     * 4. "g:a:v", configuration = "foo"
+     * ```
+     */
+    override fun toString(): String = buildString {
+      if (explicitPath) {
+        append("path = ")
+      }
+
+      append(path)
+
+      if (configuration != null) {
+        append(", configuration = ")
+        append(configuration)
+      }
+    }
+
+    internal companion object {
+      fun String?.asSimpleIdentifier(): Identifier? {
+        return if (this != null) {
+          Identifier(path = this)
+        } else {
+          null
+        }
+      }
+    }
+  }
 
   /**
    * @see <a href="https://docs.gradle.org/current/userguide/component_capabilities.html">Component Capabilities</a>
@@ -71,8 +111,11 @@ public data class DependencyDeclaration(
    * @see <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/ModuleDependency.html">ModuleDependency</a>
    */
   public enum class Type {
-    PROJECT,
+    FILE,
+    FILES,
+    FILE_TREE,
     MODULE,
+    PROJECT,
     ;
   }
 }

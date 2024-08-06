@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  api(project((":grammar")))
+  api(project(":grammar"))
 
   api(libs.antlr.runtime)
   api(libs.kotlinStdLib)

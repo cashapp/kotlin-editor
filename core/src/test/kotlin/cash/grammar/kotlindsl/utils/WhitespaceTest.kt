@@ -1,14 +1,7 @@
 package cash.grammar.kotlindsl.utils
 
 import cash.grammar.kotlindsl.parse.Parser
-import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
-import cash.grammar.kotlindsl.utils.Blocks.isSubprojects
 import cash.grammar.kotlindsl.utils.test.TestErrorListener
-import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
-import com.squareup.cash.grammar.KotlinParserBaseListener
-import org.antlr.v4.runtime.CharStream
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.Token
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.Test
@@ -199,28 +192,6 @@ internal class WhitespaceTest {
         expectedIndent = "\t",
       ),
     )
-  }
-
-  private class TestListener(
-    private val input: CharStream,
-    private val tokens: CommonTokenStream,
-    private val defaultIndent: String = "  ",
-  ) : KotlinParserBaseListener() {
-
-    var newlines: List<Token>? = null
-    var whitespace: List<Token>? = null
-    val trailingBuildscriptNewlines = Whitespace.countTerminalNewlines(tokens)
-    val trailingKotlinFileNewlines = Whitespace.countTerminalNewlines(tokens)
-    val indent = Whitespace.computeIndent(tokens, input, defaultIndent)
-
-    override fun exitNamedBlock(ctx: NamedBlockContext) {
-      if (ctx.isSubprojects) {
-        newlines = Whitespace.getBlankSpaceToLeft(tokens, ctx)
-      }
-      if (ctx.isBuildscript) {
-        whitespace = Whitespace.getWhitespaceToLeft(tokens, ctx)
-      }
-    }
   }
 
   internal class TestCase(
