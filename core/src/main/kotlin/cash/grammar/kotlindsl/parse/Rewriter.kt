@@ -46,7 +46,7 @@ public class Rewriter(
   }
 
   /**
-   * Deletes all comments "to the right of" [after], returning the list of comment tokens, if they
+   * Deletes all comments "to the left of" [before], returning the list of comment tokens, if they
    * exist.
    */
   public fun deleteCommentsToLeft(

@@ -2,14 +2,52 @@ package cash.grammar.kotlindsl.utils
 
 import cash.grammar.kotlindsl.model.DependencyDeclaration
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Capability
+import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier
+import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier.Companion.asSimpleIdentifier
+import cash.grammar.kotlindsl.model.gradle.DependencyContainer
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
+import cash.grammar.kotlindsl.utils.Context.fullText
 import cash.grammar.kotlindsl.utils.Context.leafRule
 import cash.grammar.kotlindsl.utils.Context.literalText
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
 import com.squareup.cash.grammar.KotlinParser.PostfixUnaryExpressionContext
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.ParserRuleContext
 
-public class DependencyExtractor {
+public class DependencyExtractor(
+  private val input: CharStream,
+  tokens: CommonTokenStream,
+  indent: String,
+) {
+
+  private val comments = Comments(tokens, indent)
+
+  public fun onEnterBlock() {
+    comments.onEnterBlock()
+  }
+
+  public fun onExitBlock() {
+    comments.onExitBlock()
+  }
+
+  /**
+   * Given that we're inside a `dependencies {}` block, collect the set of dependencies.
+   */
+  public fun collectDependencies(ctx: NamedBlockContext): DependencyContainer {
+    require(ctx.isDependencies) {
+      "Expected dependencies block. Was '${ctx.name().text}'"
+    }
+
+    val statements = ctx.statements().statement()
+    if (statements == null || statements.isEmpty()) return DependencyContainer.EMPTY
+
+    return statements
+      .mapNotNull { it.leafRule() as? PostfixUnaryExpressionContext }
+      .map { parseDependencyDeclaration(it) }
+      .asContainer()
+  }
 
   /**
    * Given that we're inside `buildscript { dependencies { ... } }`, collect all of the `classpath`
@@ -22,17 +60,20 @@ public class DependencyExtractor {
   public fun collectClasspathDependencies(
     blockStack: ArrayDeque<NamedBlockContext>,
     ctx: NamedBlockContext,
-  ): List<DependencyDeclaration> {
+  ): DependencyContainer {
     // Validate we're in `buildscript { dependencies { ... } }` first
-    if (!isInBuildscriptDependenciesBlock(blockStack)) return emptyList()
+    if (!isInBuildscriptDependenciesBlock(blockStack)) return DependencyContainer.EMPTY
 
     val statements = ctx.statements().statement()
-    if (statements == null || statements.isEmpty()) return emptyList()
+    if (statements == null || statements.isEmpty()) return DependencyContainer.EMPTY
 
     return statements
       .mapNotNull { it.leafRule() as? PostfixUnaryExpressionContext }
       .map { parseDependencyDeclaration(it) }
+      .asContainer()
   }
+
+  private fun List<Any>.asContainer() = DependencyContainer(this)
 
   private fun isInBuildscriptDependenciesBlock(
     blockStack: ArrayDeque<NamedBlockContext>,
@@ -44,15 +85,22 @@ public class DependencyExtractor {
 
   private fun parseDependencyDeclaration(
     declaration: PostfixUnaryExpressionContext,
-  ): DependencyDeclaration {
+  ): Any {
     // e.g., `classpath`, `implementation`, etc.
     val configuration = declaration.primaryExpression().text
-    var identifier: String?
+    var identifier: Identifier?
     var capability = Capability.DEFAULT
     var type = DependencyDeclaration.Type.MODULE
 
     // This is everything after the configuration, including optionally a trailing lambda
     val rawDependency = declaration.postfixUnarySuffix().single().callSuffix()
+
+    val args = rawDependency.valueArguments().valueArgument()
+
+    // Not a normal declaration, but a function call
+    if (args.size > 1) {
+      return parseFunctionCall(declaration)
+    }
 
     /*
      * This leaf includes, in order:
@@ -67,10 +115,10 @@ public class DependencyExtractor {
      * It's a postfix... if it is anything more complex.
      */
 
-    val leaf = rawDependency.valueArguments().valueArgument().single().leafRule()
+    val leaf = args.single().leafRule()
 
     // 3. In case we have a simple dependency of the form `classpath("group:artifact:version")`
-    identifier = literalText(leaf)
+    identifier = quoted(leaf).asSimpleIdentifier()
 
     // 1. Find capability, if present.
     // 2. Determine type, if present.
@@ -79,50 +127,164 @@ public class DependencyExtractor {
       if (Capability.isCapability(maybeCapability)) {
         capability = Capability.of(maybeCapability)
 
-        identifier = literalText(
+        identifier = quoted(
           leaf.postfixUnarySuffix().single()
             .callSuffix().valueArguments().valueArgument().single()
             .leafRule()
-        )
+        ).asSimpleIdentifier()
       } else if (maybeCapability == "project") {
         type = DependencyDeclaration.Type.PROJECT
 
-        identifier = literalText(
-          leaf.postfixUnarySuffix().single()
-            .callSuffix().valueArguments().valueArgument().single()
-            .leafRule()
-        )
+        // TODO(tsr): use findIdentifier everywhere?
+        identifier = findIdentifier(leaf)
+      } else if (maybeCapability == "file") {
+        type = DependencyDeclaration.Type.FILE
+
+        // TODO(tsr): use findIdentifier everywhere?
+        identifier = findIdentifier(leaf)
+      } else if (maybeCapability == "files") {
+        type = DependencyDeclaration.Type.FILES
+
+        // TODO(tsr): use findIdentifier everywhere?
+        identifier = findIdentifier(leaf)
+      } else if (maybeCapability == "fileTree") {
+        type = DependencyDeclaration.Type.FILE_TREE
+
+        // TODO(tsr): use findIdentifier everywhere?
+        identifier = findIdentifier(leaf)
       }
 
       // 2. Determine if `PROJECT` type.
       // 3. Also find `identifier` at this point.
-      val newLeaf = leaf.postfixUnarySuffix().single()
-        ?.callSuffix()?.valueArguments()?.valueArgument()?.single()
-        ?.leafRule()
+      val suffixes = leaf.postfixUnarySuffix()
+      val args = suffixes.singleOrNull()?.callSuffix()?.valueArguments()?.valueArgument()
 
-      if (newLeaf is PostfixUnaryExpressionContext) {
-        val maybeProjectType = newLeaf.primaryExpression().text
-        if (maybeProjectType == "project") {
-          type = DependencyDeclaration.Type.PROJECT
-          identifier = literalText(
-            newLeaf.postfixUnarySuffix().single().callSuffix().valueArguments().valueArgument()
-              .single()
-          )
-        } else {
-          // e.g., `libs.kotlinGradleBom` ("libs" is the primaryExpression)
-          identifier = newLeaf.text
+      if (args?.size == 1) {
+        val newLeaf = args.single().leafRule()
+
+        if (newLeaf is PostfixUnaryExpressionContext) {
+          val maybeProjectType = newLeaf.primaryExpression().text
+          if (maybeProjectType == "project") {
+            type = DependencyDeclaration.Type.PROJECT
+            identifier = quoted(
+              newLeaf.postfixUnarySuffix().single()
+                .callSuffix()
+                .valueArguments().valueArgument().single()
+            ).asSimpleIdentifier()
+          } else {
+            // e.g., `libs.kotlinGradleBom` ("libs" is the primaryExpression)
+            identifier = newLeaf.text.asSimpleIdentifier()
+          }
         }
-      } else if (newLeaf == null) {
+      } else if (args == null) {
         // We're looking at something like `libs.kotlinGradleBom`
-        identifier = leaf.text
+        identifier = leaf.text.asSimpleIdentifier()
       }
     }
+
+    val precedingComment = comments.getCommentsToLeft(declaration)
 
     return DependencyDeclaration(
       configuration = configuration,
       identifier = identifier!!,
       capability = capability,
       type = type,
+      fullText = declaration.fullText(input)!!,
+      precedingComment = precedingComment,
+    )
+  }
+
+  /**
+   * The quotation marks are an important part of how the dependency is declared. Is it
+   * ```
+   * 1. "g:a:v", or
+   * 2. libs.gav
+   * ```
+   * ?
+   */
+  private fun quoted(ctx: ParserRuleContext): String? {
+    return literalText(ctx)?.let { "\"$it\"" }
+  }
+
+  /**
+   * E.g.,
+   * ```
+   * add("extraImplementation", "com.foo:bar:1.0")
+   * ```
+   */
+  private fun parseFunctionCall(statement: PostfixUnaryExpressionContext): Any {
+    // TODO(tsr): anything more interesting?
+    return statement.fullText(input)!!
+  }
+
+  private fun findIdentifier(ctx: PostfixUnaryExpressionContext): Identifier? {
+    val args = ctx.postfixUnarySuffix().single()
+      .callSuffix()
+      .valueArguments()
+      .valueArgument()
+
+    // 1. possibly a simple identifier, like `g:a:v`, or
+    // 2. `path = "foo"`
+    if (args.size == 1) {
+      val singleArg = args.single()
+
+      quoted(singleArg.leafRule())?.let { identifier ->
+        return Identifier(path = identifier)
+      }
+
+      // maybe `path = "foo"`
+      val exprName = singleArg.simpleIdentifier()?.Identifier()?.text
+      if (exprName == "path") {
+        quoted(singleArg.expression().leafRule())?.let { identifier ->
+          return Identifier(path = identifier, explicitPath = true)
+        }
+      }
+    }
+
+    // Unclear what this would be, bail
+    if (args.size > 2) {
+      return null
+    }
+
+    // possibly a map-like expression, e.g.,
+    // 1. `path = "foo", configuration = "bar"`, or
+    // 2. `"foo", configuration = "bar"`
+    val firstArg = args[0]
+    val secondArg = args[1]
+
+    val firstKey = firstArg.simpleIdentifier()?.Identifier()?.text
+    val secondKey = secondArg.simpleIdentifier()?.Identifier()?.text
+
+    val firstValue = quoted(firstArg.expression()) ?: return null
+    val secondValue = quoted(secondArg.expression()) ?: return null
+
+    val path: String
+    val configuration: String
+    val explicitPath = firstKey == "path" || secondKey == "path"
+
+    if (firstKey == "path" || firstKey == null) {
+      require(secondKey == "configuration") {
+        "Expected 'configuration', was '$secondKey'."
+      }
+
+      path = firstValue
+      configuration = secondValue
+    } else {
+      require(firstKey == "configuration") {
+        "Expected 'configuration', was '$firstKey'."
+      }
+      require(secondKey == "path") {
+        "Expected 'path', was '$secondKey'."
+      }
+
+      path = secondValue
+      configuration = firstValue
+    }
+
+    return Identifier(
+      path = path,
+      configuration = configuration,
+      explicitPath = explicitPath,
     )
   }
 }
