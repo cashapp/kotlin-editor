@@ -185,13 +185,16 @@ public class DependencyExtractor(
     }
 
     val precedingComment = comments.getCommentsToLeft(declaration)
+    val fullText = declaration.fullText(input)
+      ?: error("Could not determine 'full text' of dependency declaration. Failed to parse expression:\n  ${declaration.text}")
 
     return DependencyDeclaration(
       configuration = configuration,
-      identifier = identifier!!,
+      identifier = identifier
+        ?: error("Could not determine dependency identifier. Failed to parse expression:\n  `$fullText`"),
       capability = capability,
-      type = type,
-      fullText = declaration.fullText(input)!!,
+      type = type.or(identifier),
+      fullText = fullText,
       precedingComment = precedingComment,
     )
   }

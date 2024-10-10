@@ -10,15 +10,13 @@ import org.antlr.v4.runtime.misc.Interval
 public object Context {
 
   /**
-   * Returns the "full text", from [input], represented by [this][ParserRuleContext]. The full text
-   * includes tokens that are sent to hidden channels by the lexer. cf.
-   * [ParserRuleContext.text][ParserRuleContext.getText], which only considers tokens which have
-   * been added to the parse tree (i.e., not comments or whitespace).
+   * Returns the "full text", from [input], represented by [this][ParserRuleContext]. The full text includes tokens that
+   * are sent to hidden channels by the lexer. cf. [ParserRuleContext.text][ParserRuleContext.getText], which only
+   * considers tokens which have been added to the parse tree (i.e., not comments or whitespace).
    *
-   * Returns null if `this` has a null [ParserRuleContext.start] or [ParserRuleContext.stop], which
-   * can happen when, e.g., `this` is a
-   * [ScriptContext][com.squareup.cash.grammar.KotlinParser.ScriptContext]. (I don't
-   * fully understand why those tokens might be null.)
+   * Returns null if `this` has a null [ParserRuleContext.start] or [ParserRuleContext.stop], which can happen when,
+   * e.g., `this` is a [ScriptContext][com.squareup.cash.grammar.KotlinParser.ScriptContext]. (I don't fully understand
+   * why those tokens might be null.)
    */
   public fun ParserRuleContext.fullText(input: CharStream): String? {
     val a = start?.startIndex ?: return null
