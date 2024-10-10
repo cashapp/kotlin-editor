@@ -136,22 +136,24 @@ public class DependencyExtractor(
         type = DependencyDeclaration.Type.PROJECT
 
         // TODO(tsr): use findIdentifier everywhere?
-        identifier = findIdentifier(leaf)
+        identifier = leaf.findIdentifier()
       } else if (maybeCapability == "file") {
         type = DependencyDeclaration.Type.FILE
 
         // TODO(tsr): use findIdentifier everywhere?
-        identifier = findIdentifier(leaf)
+        identifier = leaf.findIdentifier()
       } else if (maybeCapability == "files") {
         type = DependencyDeclaration.Type.FILES
 
         // TODO(tsr): use findIdentifier everywhere?
-        identifier = findIdentifier(leaf)
+        identifier = leaf.findIdentifier()
       } else if (maybeCapability == "fileTree") {
         type = DependencyDeclaration.Type.FILE_TREE
 
         // TODO(tsr): use findIdentifier everywhere?
-        identifier = findIdentifier(leaf)
+        identifier = leaf.findIdentifier()
+      } else if (maybeCapability != null) {
+        identifier = leaf.findIdentifier(maybeCapability)
       }
 
       // 2. Determine if `PROJECT` type.
@@ -217,8 +219,8 @@ public class DependencyExtractor(
     return statement.fullText(input)!!
   }
 
-  private fun findIdentifier(ctx: PostfixUnaryExpressionContext): Identifier? {
-    val args = ctx.postfixUnarySuffix().single()
+  private fun PostfixUnaryExpressionContext.findIdentifier(): Identifier? {
+    val args = postfixUnarySuffix().single()
       .callSuffix()
       .valueArguments()
       .valueArgument()
@@ -286,5 +288,28 @@ public class DependencyExtractor(
       configuration = configuration,
       explicitPath = explicitPath,
     )
+  }
+
+  /**
+   * Looking for something like this:
+   * ```
+   * gradleApi()
+   * ```
+   *
+   * which is a proper dependency, to be used like this:
+   * ```
+   * dependencies {
+   *   api(gradleApi())
+   * }
+   * ```
+   */
+  private fun PostfixUnaryExpressionContext.findIdentifier(name: String): Identifier? {
+    val suffix = postfixUnarySuffix().singleOrNull() ?: return null
+    val valueArguments = suffix.callSuffix()?.valueArguments() ?: return null
+    // empty value arguments indicates "()", i.e., no arguments to the function call.
+    if (valueArguments.valueArgument().isNotEmpty()) return null
+
+    // e.g. "gradleApi()"
+    return "$name()".asSimpleIdentifier()
   }
 }
