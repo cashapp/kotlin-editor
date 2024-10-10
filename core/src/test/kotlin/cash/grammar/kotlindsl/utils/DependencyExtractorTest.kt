@@ -76,7 +76,7 @@ internal class DependencyExtractorTest {
         configuration = "api",
         identifier = "gradleApi()",
         capability = Capability.DEFAULT,
-        type = Type.MODULE, // TODO: new type?
+        type = Type.GRADLE_DISTRIBUTION,
       ),
     )
   }

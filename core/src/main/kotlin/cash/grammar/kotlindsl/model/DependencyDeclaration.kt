@@ -114,8 +114,23 @@ public data class DependencyDeclaration(
     FILE,
     FILES,
     FILE_TREE,
+    GRADLE_DISTRIBUTION,
     MODULE,
     PROJECT,
     ;
+
+    public fun or(identifier: Identifier): Type {
+      return if (identifier.path in GRADLE_DISTRIBUTIONS) {
+        GRADLE_DISTRIBUTION
+      } else {
+        // In this case, might just be a user-supplied function that returns a dependency declaration
+        this
+      }
+    }
+
+    private companion object {
+      /** Well-known dependencies available directly from the local Gradle distribution. */
+      val GRADLE_DISTRIBUTIONS = listOf("gradleApi()", "gradleTestKit()", "localGroovy()")
+    }
   }
 }
