@@ -86,22 +86,22 @@ public data class DependencyDeclaration(
    */
   public enum class Capability {
     DEFAULT,
+    ENFORCED_PLATFORM,
     PLATFORM,
     TEST_FIXTURES,
     ;
 
     public companion object {
-      private val capabilities = listOf("testFixtures", "platform")
+      private val capabilities = listOf("testFixtures", "enforcedPlatform", "platform")
 
       public fun isCapability(value: String): Boolean = value in capabilities
 
       public fun of(value: String): Capability {
         return when (value) {
           "testFixtures" -> TEST_FIXTURES
+          "enforcedPlatform" -> ENFORCED_PLATFORM
           "platform" -> PLATFORM
-          else -> error(
-            "Unrecognized capability: '$value'. Expected one of '$capabilities'."
-          )
+          else -> error("Unrecognized capability: '$value'. Expected one of '$capabilities'.")
         }
       }
     }
