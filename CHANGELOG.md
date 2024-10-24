@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.6
+* [feat] support enforcedPlatform as a dependency capability.
+
 ## Version 0.5
 * [feat] support parsing `gradleApi()`-like dependency declarations.
 * [fix] improve error messages during parse errors.
