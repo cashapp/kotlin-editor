@@ -71,6 +71,22 @@ internal class DependencyExtractorTest {
         type = Type.PROJECT,
       ),
       TestCase(
+        displayName = "platform capability for version catalog dependency",
+        fullText = "implementation(platform(libs.bigBom))",
+        configuration = "implementation",
+        identifier = "libs.bigBom",
+        capability = Capability.PLATFORM,
+        type = Type.MODULE,
+      ),
+      TestCase(
+        displayName = "enforcedPlatform capability for version catalog dependency",
+        fullText = "implementation(enforcedPlatform(libs.bigBom))",
+        configuration = "implementation",
+        identifier = "libs.bigBom",
+        capability = Capability.ENFORCED_PLATFORM,
+        type = Type.MODULE,
+      ),
+      TestCase(
         displayName = "gradleApi",
         fullText = "api(gradleApi())",
         configuration = "api",
