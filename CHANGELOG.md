@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.8
+* [fix]: handle more kinds of dependency declarations on properties.
+
 ## Version 0.7
 * [fix]: handle dependency declarations on properties.
 
