@@ -12,6 +12,7 @@ import cash.grammar.kotlindsl.utils.Context.leafRule
 import cash.grammar.kotlindsl.utils.Context.literalText
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
 import com.squareup.cash.grammar.KotlinParser.PostfixUnaryExpressionContext
+import com.squareup.cash.grammar.KotlinParser.SimpleIdentifierContext
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
@@ -182,6 +183,9 @@ public class DependencyExtractor(
         // We're looking at something like `libs.kotlinGradleBom`
         identifier = leaf.text.asSimpleIdentifier()
       }
+    } else if (leaf is SimpleIdentifierContext) {
+      // For expressions like `api(gav)` where `val gav = "..."`
+      identifier = leaf.text.asSimpleIdentifier()
     }
 
     val precedingComment = comments.getCommentsToLeft(declaration)
