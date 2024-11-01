@@ -62,6 +62,40 @@ internal class DependencyExtractorTest {
         capability = Capability.DEFAULT,
         type = Type.MODULE,
       ),
+      /*
+       * This case might look like this in a build script:
+       * ```
+       * val gav = "g:a:v"
+       * dependencies {
+       *   api(platform(gav))
+       * }
+       * ```
+       */
+      TestCase(
+        displayName = "extracted string coordinates for a platform",
+        fullText = "api(platform(gav))",
+        configuration = "api",
+        identifier = "gav",
+        capability = Capability.PLATFORM,
+        type = Type.MODULE,
+      ),
+      /*
+       * This case might look like this in a build script:
+       * ```
+       * val proj = ":project"
+       * dependencies {
+       *   api(platform(project(proj)))
+       * }
+       * ```
+       */
+      TestCase(
+        displayName = "extracted string coordinates for a platform on a project",
+        fullText = "api(platform(project(proj)))",
+        configuration = "api",
+        identifier = "proj",
+        capability = Capability.PLATFORM,
+        type = Type.PROJECT,
+      ),
       TestCase(
         displayName = "version catalog accessor",
         fullText = "implementation(libs.gAV)",
