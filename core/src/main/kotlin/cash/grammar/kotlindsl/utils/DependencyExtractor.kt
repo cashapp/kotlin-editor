@@ -169,11 +169,7 @@ public class DependencyExtractor(
           val maybeProjectType = newLeaf.primaryExpression().text
           if (maybeProjectType == "project") {
             type = DependencyDeclaration.Type.PROJECT
-            identifier = quoted(
-              newLeaf.postfixUnarySuffix().single()
-                .callSuffix()
-                .valueArguments().valueArgument().single()
-            ).asSimpleIdentifier()
+            identifier = newLeaf.findIdentifier()
           } else {
             // e.g., `libs.kotlinGradleBom` ("libs" is the primaryExpression)
             identifier = newLeaf.text.asSimpleIdentifier()
@@ -186,6 +182,10 @@ public class DependencyExtractor(
     } else if (leaf is SimpleIdentifierContext) {
       // For expressions like `api(gav)` where `val gav = "..."`
       identifier = leaf.text.asSimpleIdentifier()
+    }
+
+    if (identifier == null && leaf is PostfixUnaryExpressionContext) {
+      identifier = leaf.findIdentifier()
     }
 
     val precedingComment = comments.getCommentsToLeft(declaration)
@@ -247,6 +247,10 @@ public class DependencyExtractor(
         quoted(singleArg.expression().leafRule())?.let { identifier ->
           return Identifier(path = identifier, explicitPath = true)
         }
+      }
+
+      (singleArg.leafRule() as? SimpleIdentifierContext)?.Identifier()?.text.asSimpleIdentifier()?.let {
+        return it
       }
     }
 
