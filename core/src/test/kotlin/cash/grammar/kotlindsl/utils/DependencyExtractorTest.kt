@@ -36,13 +36,29 @@ internal class DependencyExtractorTest {
   }
 
   private companion object {
-    // TODO(tsr): test for Capability.PLATFORM
     @JvmStatic fun declarations(): List<TestCase> = listOf(
       TestCase(
         displayName = "raw string coordinates",
         fullText = "api(\"g:a:v\")",
         configuration = "api",
         identifier = "\"g:a:v\"",
+        capability = Capability.DEFAULT,
+        type = Type.MODULE,
+      ),
+      /*
+       * This case might look like this in a build script:
+       * ```
+       * val gav = "g:a:v"
+       * dependencies {
+       *   api(gav)
+       * }
+       * ```
+       */
+      TestCase(
+        displayName = "extracted string coordinates",
+        fullText = "api(gav)",
+        configuration = "api",
+        identifier = "gav",
         capability = Capability.DEFAULT,
         type = Type.MODULE,
       ),
