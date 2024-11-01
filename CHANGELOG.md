@@ -1,6 +1,9 @@
 # KotlinEditor
 
-## Version 0.6
+## Version 0.7
+* [fix]: handle dependency declarations on properties.
+
+## Version 0.6q
 * [feat] support enforcedPlatform as a dependency capability.
 
 ## Version 0.5
