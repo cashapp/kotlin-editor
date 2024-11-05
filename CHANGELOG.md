@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.9
+* [feat]: DependencyExtractor includes all statements in DependencyContainer.
+
 ## Version 0.8
 * [fix]: handle more kinds of dependency declarations on properties.
 
