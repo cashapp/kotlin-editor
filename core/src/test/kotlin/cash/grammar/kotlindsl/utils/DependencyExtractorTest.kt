@@ -7,6 +7,7 @@ import cash.grammar.kotlindsl.model.DependencyDeclaration.Type
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.utils.test.TestErrorListener
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -23,16 +24,65 @@ internal class DependencyExtractorTest {
     """.trimIndent()
 
     // When
-    val scriptListener = Parser(
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(testCase.toDependencyDeclaration())
+  }
+
+  @Test fun `a complex script can be fully parsed`() {
+    // Given
+    val buildScript = """
+      dependencies {
+        api(libs.magic)
+        
+        add("extraImplementation", libs.fortyTwo)
+        
+        val complex = "a:complex:${'$'}expression"
+        
+        if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
+          // Multi-line comment about why we're
+          // doing this.
+          testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
+        }
+      }
+    """.trimIndent()
+
+    // When
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "api",
+        identifier = "libs.magic".asSimpleIdentifier()!!,
+        capability = DependencyDeclaration.Capability.DEFAULT,
+        type = DependencyDeclaration.Type.MODULE,
+        fullText = "api(libs.magic)",
+      )
+    )
+    assertThat(scriptListener.expressions).containsExactly("add(\"extraImplementation\", libs.fortyTwo)")
+    assertThat(scriptListener.statements).containsExactly(
+      "val complex = \"a:complex:${'$'}expression\"",
+      // The whitespace below is a bit wonky, but it's an artifact of the test fixture, not the API.
+      """
+        if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
+            // Multi-line comment about why we're
+            // doing this.
+            testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
+          }
+      """.trimIndent()
+    )
+  }
+
+  private fun listenerFor(buildScript: String): TestListener {
+    return Parser(
       file = buildScript,
       errorListener = TestErrorListener {
         throw RuntimeException("Syntax error: ${it?.message}", it)
       },
       listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
     ).listener()
-
-    // Then
-    assertThat(scriptListener.dependencyDeclarations).containsExactly(testCase.toDependencyDeclaration())
   }
 
   private companion object {

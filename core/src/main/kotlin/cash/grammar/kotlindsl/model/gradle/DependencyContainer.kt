@@ -1,6 +1,7 @@
 package cash.grammar.kotlindsl.model.gradle
 
 import cash.grammar.kotlindsl.model.DependencyDeclaration
+import com.squareup.cash.grammar.KotlinParser.StatementContext
 
 /**
  * A container for all the [Statements][com.squareup.cash.grammar.KotlinParser.StatementsContext] in
@@ -13,15 +14,44 @@ import cash.grammar.kotlindsl.model.DependencyDeclaration
  * as-is.
  */
 public class DependencyContainer(
-  private val statements: List<Any>,
+  /** The raw, ordered, list of statements for more complex use-cases. */
+  public val elements: List<Any>,
 ) {
 
   public fun getDependencyDeclarations(): List<DependencyDeclaration> {
-    return statements.filterIsInstance<DependencyDeclaration>()
+    return elements.filterIsInstance<DependencyDeclaration>()
   }
 
+  @Deprecated(
+    message = "use getExpressions",
+    replaceWith = ReplaceWith("getExpressions()")
+  )
   public fun getNonDeclarations(): List<String> {
-    return statements.filterIsInstance<String>()
+    return getExpressions()
+  }
+
+  /**
+   * A common example of an expression in a dependencies block is
+   * ```
+   * add("extraImplementation", "com.foo:bar:1.0")
+   * ```
+   */
+  public fun getExpressions(): List<String> {
+    return elements.filterIsInstance<String>()
+  }
+
+  /**
+   * Might include an [if-expression][com.squareup.cash.grammar.KotlinParser.IfExpressionContext] like
+   * ```
+   * if (functionReturningABoolean()) { ... }
+   * ```
+   * or a [property declaration][com.squareup.cash.grammar.KotlinParser.PropertyDeclarationContext] like
+   * ```
+   * val string = "a:complex:$value"
+   * ```
+   */
+  public fun getStatements(): List<StatementContext> {
+    return elements.filterIsInstance<StatementContext>()
   }
 
   internal companion object {
