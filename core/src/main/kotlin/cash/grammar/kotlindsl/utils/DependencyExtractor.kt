@@ -42,11 +42,18 @@ public class DependencyExtractor(
     }
 
     val statements = ctx.statements().statement()
-    if (statements == null || statements.isEmpty()) return DependencyContainer.EMPTY
+    if (statements.isNullOrEmpty()) return DependencyContainer.EMPTY
 
     return statements
-      .mapNotNull { it.leafRule() as? PostfixUnaryExpressionContext }
-      .map { parseDependencyDeclaration(it) }
+      .map { stmt ->
+        val leaf = stmt.leafRule()
+        if (leaf is PostfixUnaryExpressionContext) {
+          parseDependencyDeclaration(leaf)
+        } else {
+          // If it's not a known type, we just grab the raw KotlinParser.StatementContext
+          stmt
+        }
+      }
       .asContainer()
   }
 
@@ -87,21 +94,20 @@ public class DependencyExtractor(
   private fun parseDependencyDeclaration(
     declaration: PostfixUnaryExpressionContext,
   ): Any {
-    // e.g., `classpath`, `implementation`, etc.
-    val configuration = declaration.primaryExpression().text
-    var identifier: Identifier?
-    var capability = Capability.DEFAULT
-    var type = DependencyDeclaration.Type.MODULE
-
     // This is everything after the configuration, including optionally a trailing lambda
     val rawDependency = declaration.postfixUnarySuffix().single().callSuffix()
-
     val args = rawDependency.valueArguments().valueArgument()
 
     // Not a normal declaration, but a function call
     if (args.size > 1) {
       return parseFunctionCall(declaration)
     }
+
+    // e.g., `classpath`, `implementation`, etc.
+    val configuration = declaration.primaryExpression().text
+    var identifier: Identifier?
+    var capability = Capability.DEFAULT
+    var type = DependencyDeclaration.Type.MODULE
 
     /*
      * This leaf includes, in order:
@@ -222,7 +228,7 @@ public class DependencyExtractor(
    * ```
    */
   private fun parseFunctionCall(statement: PostfixUnaryExpressionContext): Any {
-    // TODO(tsr): anything more interesting?
+    // TODO(tsr): we should consider modeling function calls separately, since it's a well-known use-case.
     return statement.fullText(input)!!
   }
 

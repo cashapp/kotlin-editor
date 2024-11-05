@@ -4,6 +4,7 @@ import cash.grammar.kotlindsl.model.DependencyDeclaration
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
 import cash.grammar.kotlindsl.utils.Blocks.isSubprojects
+import cash.grammar.kotlindsl.utils.Context.fullText
 import com.squareup.cash.grammar.KotlinParser
 import com.squareup.cash.grammar.KotlinParserBaseListener
 import org.antlr.v4.runtime.CharStream
@@ -24,6 +25,8 @@ internal class TestListener(
   val dependencyExtractor = DependencyExtractor(input, tokens, indent)
 
   val dependencyDeclarations = mutableListOf<DependencyDeclaration>()
+  val expressions = mutableListOf<String>()
+  val statements = mutableListOf<String>()
 
   override fun exitNamedBlock(ctx: KotlinParser.NamedBlockContext) {
     if (ctx.isSubprojects) {
@@ -33,8 +36,11 @@ internal class TestListener(
       whitespace = Whitespace.getWhitespaceToLeft(tokens, ctx)
     }
     if (ctx.isDependencies) {
-      dependencyDeclarations += dependencyExtractor.collectDependencies(ctx)
-        .getDependencyDeclarations()
+      val dependencyContainer = dependencyExtractor.collectDependencies(ctx)
+
+      dependencyDeclarations += dependencyContainer.getDependencyDeclarations()
+      expressions += dependencyContainer.getExpressions()
+      statements += dependencyContainer.getStatements().map { it.fullText(input)!!.trim() }
     }
   }
 }
