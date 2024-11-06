@@ -58,6 +58,28 @@ public class DependencyExtractor(
   }
 
   /**
+   * Given that we're inside a `dependencies {}` block, collect the set of dependencies with their context.
+   */
+  public fun collectDependencyDeclarationsWithContext(ctx: NamedBlockContext): List<Pair<DependencyDeclaration, PostfixUnaryExpressionContext>> {
+    require(ctx.isDependencies) {
+      "Expected dependencies block. Was '${ctx.name().text}'"
+    }
+
+    val statements = ctx.statements().statement()
+    if (statements.isNullOrEmpty()) return emptyList()
+
+    return statements.mapNotNull { stmt ->
+      val leaf = stmt.leafRule()
+      if (leaf is PostfixUnaryExpressionContext) {
+        val dependency = parseDependencyDeclaration(leaf) as? DependencyDeclaration
+        dependency?.let { it to leaf }
+      } else {
+        null
+      }
+    }
+  }
+
+  /**
    * Given that we're inside `buildscript { dependencies { ... } }`, collect all of the `classpath`
    * dependencies.
    *
