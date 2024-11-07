@@ -4,6 +4,7 @@ import cash.grammar.kotlindsl.model.DependencyDeclaration
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Capability
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier.Companion.asSimpleIdentifier
+import cash.grammar.kotlindsl.model.DependencyDeclarationWithContext
 import cash.grammar.kotlindsl.model.gradle.DependencyContainer
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
@@ -47,8 +48,8 @@ public class DependencyExtractor(
     return statements
       .map { stmt ->
         val leaf = stmt.leafRule()
-        if (leaf is PostfixUnaryExpressionContext) {
-          parseDependencyDeclaration(leaf)
+        if (leaf is PostfixUnaryExpressionContext && leaf.isDependencyDeclaration()) {
+          DependencyDeclarationWithContext(parseDependencyDeclaration(leaf), stmt)
         } else {
           // If it's not a known type, we just grab the raw KotlinParser.StatementContext
           stmt
@@ -99,6 +100,7 @@ public class DependencyExtractor(
 
     return statements
       .mapNotNull { it.leafRule() as? PostfixUnaryExpressionContext }
+      .filter { it.isDependencyDeclaration() }
       .map { parseDependencyDeclaration(it) }
       .asContainer()
   }
@@ -113,17 +115,10 @@ public class DependencyExtractor(
       && blockStack[1].isBuildscript
   }
 
-  private fun parseDependencyDeclaration(
-    declaration: PostfixUnaryExpressionContext,
-  ): Any {
+  private fun parseDependencyDeclaration(declaration: PostfixUnaryExpressionContext): DependencyDeclaration {
     // This is everything after the configuration, including optionally a trailing lambda
     val rawDependency = declaration.postfixUnarySuffix().single().callSuffix()
     val args = rawDependency.valueArguments().valueArgument()
-
-    // Not a normal declaration, but a function call
-    if (args.size > 1) {
-      return parseFunctionCall(declaration)
-    }
 
     // e.g., `classpath`, `implementation`, etc.
     val configuration = declaration.primaryExpression().text
@@ -243,15 +238,13 @@ public class DependencyExtractor(
     return literalText(ctx)?.let { "\"$it\"" }
   }
 
-  /**
-   * E.g.,
-   * ```
-   * add("extraImplementation", "com.foo:bar:1.0")
-   * ```
-   */
-  private fun parseFunctionCall(statement: PostfixUnaryExpressionContext): Any {
-    // TODO(tsr): we should consider modeling function calls separately, since it's a well-known use-case.
-    return statement.fullText(input)!!
+  private fun PostfixUnaryExpressionContext.isDependencyDeclaration(): Boolean {
+    // This is everything after the configuration, including optionally a trailing lambda
+    val rawDependency = this.postfixUnarySuffix().single().callSuffix()
+    val args = rawDependency.valueArguments().valueArgument()
+
+    // If there are more than one argument, it's a function call, not a dependency declaration
+    return args.size <= 1
   }
 
   private fun PostfixUnaryExpressionContext.findIdentifier(): Identifier? {
