@@ -28,6 +28,7 @@ internal class DependencyExtractorTest {
 
     // Then
     assertThat(scriptListener.dependencyDeclarations).containsExactly(testCase.toDependencyDeclaration())
+    assertThat(scriptListener.dependencyDeclarationsStatements).containsExactly(testCase.fullText)
   }
 
   @Test fun `a complex script can be fully parsed`() {
@@ -61,8 +62,9 @@ internal class DependencyExtractorTest {
         fullText = "api(libs.magic)",
       )
     )
-    assertThat(scriptListener.expressions).containsExactly("add(\"extraImplementation\", libs.fortyTwo)")
+    assertThat(scriptListener.dependencyDeclarationsStatements).containsExactly("api(libs.magic)")
     assertThat(scriptListener.statements).containsExactly(
+      "add(\"extraImplementation\", libs.fortyTwo)",
       "val complex = \"a:complex:${'$'}expression\"",
       // The whitespace below is a bit wonky, but it's an artifact of the test fixture, not the API.
       """
