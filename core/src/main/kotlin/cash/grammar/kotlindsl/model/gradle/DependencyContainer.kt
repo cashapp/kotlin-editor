@@ -1,36 +1,33 @@
 package cash.grammar.kotlindsl.model.gradle
 
-import cash.grammar.kotlindsl.model.DependencyDeclaration
-import cash.grammar.kotlindsl.model.DependencyDeclarationWithContext
+import cash.grammar.kotlindsl.model.*
 import com.squareup.cash.grammar.KotlinParser.StatementContext
 
 /**
  * A container for all the [Statements][com.squareup.cash.grammar.KotlinParser.StatementsContext] in
  * a `dependencies` block in a Gradle build script. These statements are an ordered (not sorted!)
- * list of "raw" statements and modeled
- * [DependencyDeclarations][cash.grammar.kotlindsl.model.DependencyDeclaration].
+ * list of statements, each classified as a [DependencyElement]
  *
- * Rather than attempt to model everything that might possibly be found inside a build script, we
- * declare defeat on anything that isn't a standard dependency declaration and simply retain it
- * as-is.
+ * Each statement in this container is classified as a [DependencyElement], which can represent either:
+ * - A parsed [DependencyDeclaration][cash.grammar.kotlindsl.model.DependencyDeclaration] element, or
+ * - A non-dependency declaration statement, retained as-is.
  */
 public class DependencyContainer(
-  /** The raw, ordered, list of statements for more complex use-cases. */
-  public val elements: List<Any>,
+  /** The ordered list of [DependencyElement] instances, representing each classified statement within the `dependencies` block. */
+  public val elements: List<DependencyElement>,
 ) {
 
-  public fun getDependencyDeclarationsWithContext(): List<DependencyDeclarationWithContext> {
-    return elements.filterIsInstance<DependencyDeclarationWithContext>()
+  public fun getDependencyDeclarationsWithContext(): List<DependencyDeclarationElement> {
+    return elements.filterIsInstance<DependencyDeclarationElement>()
   }
 
   public fun getDependencyDeclarations(): List<DependencyDeclaration> {
-    val declarationsWithContext = getDependencyDeclarationsWithContext().map { it.declaration }
-    return declarationsWithContext.ifEmpty {
-      elements.filterIsInstance<DependencyDeclaration>()
-    }
+    return getDependencyDeclarationsWithContext().map { it.declaration }
   }
 
   /**
+   * Get non-dependency declaration statements.
+   *
    * Might include an [if-expression][com.squareup.cash.grammar.KotlinParser.IfExpressionContext] like
    * ```
    * if (functionReturningABoolean()) { ... }
@@ -45,7 +42,7 @@ public class DependencyContainer(
    * ```
    */
   public fun getStatements(): List<StatementContext> {
-    return elements.filterIsInstance<StatementContext>()
+    return elements.filterIsInstance<NonDependencyDeclarationElement>().map { it.statement }
   }
 
   internal companion object {

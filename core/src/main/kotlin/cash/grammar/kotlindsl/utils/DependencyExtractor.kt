@@ -1,10 +1,9 @@
 package cash.grammar.kotlindsl.utils
 
-import cash.grammar.kotlindsl.model.DependencyDeclaration
+import cash.grammar.kotlindsl.model.*
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Capability
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier.Companion.asSimpleIdentifier
-import cash.grammar.kotlindsl.model.DependencyDeclarationWithContext
 import cash.grammar.kotlindsl.model.gradle.DependencyContainer
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
@@ -49,10 +48,9 @@ public class DependencyExtractor(
       .map { stmt ->
         val leaf = stmt.leafRule()
         if (leaf is PostfixUnaryExpressionContext && leaf.isDependencyDeclaration()) {
-          DependencyDeclarationWithContext(parseDependencyDeclaration(leaf), stmt)
+          DependencyDeclarationElement(parseDependencyDeclaration(leaf), stmt)
         } else {
-          // If it's not a known type, we just grab the raw KotlinParser.StatementContext
-          stmt
+          NonDependencyDeclarationElement(stmt)
         }
       }
       .asContainer()
@@ -76,14 +74,14 @@ public class DependencyExtractor(
     val statements = ctx.statements().statement()
     if (statements == null || statements.isEmpty()) return DependencyContainer.EMPTY
 
-    return statements
-      .mapNotNull { it.leafRule() as? PostfixUnaryExpressionContext }
-      .filter { it.isDependencyDeclaration() }
-      .map { parseDependencyDeclaration(it) }
-      .asContainer()
+    return statements.mapNotNull { statement ->
+      val leaf = statement.leafRule() as? PostfixUnaryExpressionContext ?: return@mapNotNull null
+      if (!leaf.isDependencyDeclaration()) return@mapNotNull null
+      DependencyDeclarationElement(parseDependencyDeclaration(leaf), statement)
+    }.asContainer()
   }
 
-  private fun List<Any>.asContainer() = DependencyContainer(this)
+  private fun List<DependencyElement>.asContainer() = DependencyContainer(this)
 
   private fun isInBuildscriptDependenciesBlock(
     blockStack: ArrayDeque<NamedBlockContext>,
