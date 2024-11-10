@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.10
+* [feat]: expose `StatementContext` with parsed dependency declarations
+
 ## Version 0.9
 * [feat]: DependencyExtractor includes all statements in DependencyContainer.
 
