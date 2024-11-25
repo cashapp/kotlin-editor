@@ -57,16 +57,16 @@ public class Comments(
   }
 
   public fun getCommentsInBlock(ctx: KotlinParser.NamedBlockContext): List<Token> {
-    val comments = ArrayDeque<Token>()
-    var index = ctx.stop.tokenIndex
+    val comments = mutableListOf<Token>()
+    var index = ctx.start.tokenIndex
 
-    while (index > ctx.start.tokenIndex) {
-      var token = tokens.get(index)
+    while (index <= ctx.stop.tokenIndex) {
+      val token = tokens.get(index)
 
       if (token.isComment()) {
-        comments.addFirst(token)
+        comments.add(token)
       }
-      --index
+      ++index
     }
 
     return comments
