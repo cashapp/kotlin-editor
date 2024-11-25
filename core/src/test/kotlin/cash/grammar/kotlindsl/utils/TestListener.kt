@@ -1,7 +1,6 @@
 package cash.grammar.kotlindsl.utils
 
 import cash.grammar.kotlindsl.model.DependencyDeclaration
-import cash.grammar.kotlindsl.model.DependencyDeclarationElement
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
 import cash.grammar.kotlindsl.utils.Blocks.isSubprojects
@@ -24,10 +23,12 @@ internal class TestListener(
   val trailingKotlinFileNewlines = Whitespace.countTerminalNewlines(tokens)
   val indent = Whitespace.computeIndent(tokens, input, defaultIndent)
   val dependencyExtractor = DependencyExtractor(input, tokens, indent)
+  val comments = Comments(tokens, indent)
 
   val dependencyDeclarations = mutableListOf<DependencyDeclaration>()
   val dependencyDeclarationsStatements = mutableListOf<String>()
   val statements = mutableListOf<String>()
+  val commentTokens = mutableMapOf<String, List<Token>>()
 
   override fun exitNamedBlock(ctx: KotlinParser.NamedBlockContext) {
     if (ctx.isSubprojects) {
@@ -43,5 +44,7 @@ internal class TestListener(
       dependencyDeclarationsStatements += dependencyContainer.getDependencyDeclarationsWithContext().map { it.statement.fullText(input)!!.trim() }
       statements += dependencyContainer.getStatements().map { it.fullText(input)!!.trim() }
     }
+
+    commentTokens[ctx.name().text] = comments.getCommentsInBlock(ctx)
   }
 }

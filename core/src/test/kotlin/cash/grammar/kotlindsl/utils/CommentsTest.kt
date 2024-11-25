@@ -52,4 +52,37 @@ internal class CommentsTest {
       ),
     )
   }
+
+  @Test fun `can find all comments in blocks`() {
+    val buildScript =
+      """
+        dependencies {
+          // This is a
+          // comment
+          implementation(libs.lib) // Inline comments
+          /*
+           * Here's a multiline comment.
+           */
+          implementation(deps.bar)
+        }
+
+        emptyBlock { }
+      """.trimIndent()
+
+    val scriptListener = Parser(
+      file = buildScript,
+      errorListener = TestErrorListener {
+        throw RuntimeException("Syntax error: ${it?.message}", it)
+      },
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
+    ).listener()
+
+    assertThat(scriptListener.commentTokens["dependencies"]?.map { it.text }).containsExactly(
+      "// This is a",
+      "// comment",
+      "// Inline comments",
+      "/*\n   * Here's a multiline comment.\n   */"
+    )
+    assertThat(scriptListener.commentTokens["emptyBlock"]?.map { it.text }).isEmpty()
+  }
 }

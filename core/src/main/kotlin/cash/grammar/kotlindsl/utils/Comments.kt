@@ -1,6 +1,7 @@
 package cash.grammar.kotlindsl.utils
 
 import com.squareup.cash.grammar.KotlinLexer
+import com.squareup.cash.grammar.KotlinParser
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
@@ -53,6 +54,22 @@ public class Comments(
     return comments.joinToString(separator = "\n") {
       "${indent.repeat(level)}$it"
     }
+  }
+
+  public fun getCommentsInBlock(ctx: KotlinParser.NamedBlockContext): List<Token> {
+    val comments = ArrayDeque<Token>()
+    var index = ctx.stop.tokenIndex
+
+    while (index > ctx.start.tokenIndex) {
+      var token = tokens.get(index)
+
+      if (token.isComment()) {
+        comments.addFirst(token)
+      }
+      --index
+    }
+
+    return comments
   }
 
   private fun Token.isWhitespace(): Boolean {
