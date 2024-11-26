@@ -1,5 +1,6 @@
 package cash.grammar.kotlindsl.utils
 
+import cash.grammar.kotlindsl.model.Assignment
 import cash.grammar.kotlindsl.parse.KotlinParseException
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.parse.Rewriter
@@ -46,6 +47,14 @@ public class CommentsInBlockRemover private constructor(
   private val rewriter = Rewriter(tokens)
   private val indent = Whitespace.computeIndent(tokens, input)
   private val comments = Comments(tokens, indent)
+  private val foundRemovableComments = mutableListOf<String>()
+
+  /**
+   * Retrieves the list of comments found in the block and can be removed from the script.
+   *
+   * @return A list of comments that are eligible for removal.
+   */
+  public fun getFoundRemovableComments(): List<String> = foundRemovableComments
 
   @Throws(KotlinParseException::class)
   public fun rewritten(): String {
@@ -66,7 +75,11 @@ public class CommentsInBlockRemover private constructor(
         allInlineComments += inlineComments
       }
 
-      val nonInlineComments = comments.getCommentsInBlock(ctx).subtract(allInlineComments)
+      val allComments = comments.getCommentsInBlock(ctx)
+      foundRemovableComments.addAll(allComments.map { it.text })
+
+      // Delete non-inline comments
+      val nonInlineComments = allComments.subtract(allInlineComments)
       nonInlineComments.forEach { token ->
         rewriter.deleteWhitespaceToLeft(token)
         rewriter.deleteNewlineToRight(token)
