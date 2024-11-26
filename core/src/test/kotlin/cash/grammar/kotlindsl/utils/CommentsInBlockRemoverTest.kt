@@ -26,7 +26,8 @@ class CommentsInBlockRemoverTest {
     """.trimMargin()
 
     // When
-    val rewrittenBuildScript = CommentsInBlockRemover.of(buildScript, "dependencies").rewritten()
+    val commentsInBlockRemover = CommentsInBlockRemover.of(buildScript, "dependencies")
+    val rewrittenBuildScript = commentsInBlockRemover.rewritten()
 
     // Then
     assertThat(rewrittenBuildScript).isEqualTo("""
@@ -42,5 +43,11 @@ class CommentsInBlockRemoverTest {
       |  // More comments 
       |}
     """.trimMargin())
+    assertThat(commentsInBlockRemover.getFoundRemovableComments()).containsOnly(
+      "/* This is a block comment\n  that spans multiple lines */",
+      "// This is an line comment",
+      "// This is a single-line comment",
+      "// This is another single-line comment",
+    )
   }
 }
