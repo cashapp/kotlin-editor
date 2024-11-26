@@ -22,10 +22,12 @@ public class Rewriter(
    * This is a complicated process because there can be a mix of whitespace, newlines (not
    * considered "whitespace" in this context), and comments, and we want to delete exactly as much
    * as necessary to "delete the line" -- nothing more, nothing less.
+   *
+   * @return deleted comment tokens
    */
   public fun deleteCommentsAndBlankSpaceToLeft(
     before: Token,
-  ) {
+  ): List<Token>? {
     var comments = deleteCommentsToLeft(before)
 
     val ws = Whitespace.getBlankSpaceToLeft(commonTokens, before).onEach {
@@ -43,11 +45,15 @@ public class Rewriter(
         ?.onEach { ws -> delete(ws) }
         ?.first()?.let { deleteNewlineToLeft(it) }
     }
+
+    return comments
   }
 
   /**
    * Deletes all comments "to the left of" [before], returning the list of comment tokens, if they
    * exist.
+   *
+   * @return deleted comment tokens
    */
   public fun deleteCommentsToLeft(
     before: Token,
@@ -70,20 +76,26 @@ public class Rewriter(
    *
    * Note that this algorithm differs from [deleteCommentsAndBlankSpaceToLeft] because comments "to
    * the right of" a statement must start on the same line (no intervening newline characters).
+   *
+   * @return deleted comment tokens
    */
   public fun deleteCommentsAndBlankSpaceToRight(
     after: Token
-  ) {
-    deleteCommentsToRight(after)
+  ): List<Token>? {
+    val comments = deleteCommentsToRight(after)
 
     Whitespace.getWhitespaceToRight(commonTokens, after)?.forEach {
       delete(it)
     }
+
+    return comments
   }
 
   /**
    * Deletes all comments "to the right of" [after], returning the list of comment tokens, if they
    * exist.
+   *
+   * @return deleted comment tokens
    */
   public fun deleteCommentsToRight(
     after: Token,
