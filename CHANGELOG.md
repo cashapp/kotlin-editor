@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.11
+* [feat]: add a utility class to remove comments from a block in a build script.
+
 ## Version 0.10
 * [feat]: expose `StatementContext` with parsed dependency declarations
 
