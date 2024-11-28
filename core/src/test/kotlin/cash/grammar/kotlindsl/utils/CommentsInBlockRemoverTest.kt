@@ -23,6 +23,7 @@ class CommentsInBlockRemoverTest {
       |otherBlock {
       |  // More comments 
       |}
+      |
     """.trimMargin()
 
     // When
@@ -42,6 +43,7 @@ class CommentsInBlockRemoverTest {
       |otherBlock {
       |  // More comments 
       |}
+      |
     """.trimMargin())
     assertThat(commentsInBlockRemover.getFoundRemovableComments()).containsOnly(
       "/* This is a block comment\n  that spans multiple lines */",

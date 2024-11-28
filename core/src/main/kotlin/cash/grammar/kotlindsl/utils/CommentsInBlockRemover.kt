@@ -43,7 +43,7 @@ public class CommentsInBlockRemover private constructor(
   private val errorListener: CollectingErrorListener,
   private val blockName: String,
 ) : KotlinParserBaseListener() {
-  private var terminalNewlines = 0
+  private var terminalNewlines = Whitespace.countTerminalNewlines(tokens)
   private val rewriter = Rewriter(tokens)
   private val indent = Whitespace.computeIndent(tokens, input)
   private val comments = Comments(tokens, indent)
