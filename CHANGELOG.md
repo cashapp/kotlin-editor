@@ -1,7 +1,10 @@
 # KotlinEditor
 
+## Version 0.13
+* [fix]: maintain terminal newline in `CommentsInBlockRemover`.
+
 ## Version 0.12
-* [fix]: make `CommentsInBlockRemover` expose found removable comments
+* [fix]: make `CommentsInBlockRemover` expose found removable comments.
 
 ## Version 0.11
 * [feat]: add a utility class to remove comments from a block in a build script.
