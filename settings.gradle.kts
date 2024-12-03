@@ -25,5 +25,6 @@ dependencyResolutionManagement {
 
 include(":core")
 include(":grammar")
+include(":recipes:dependencies")
 include(":recipes:plugins")
 include(":recipes:repos")
