@@ -1,9 +1,13 @@
 package cash.grammar.kotlindsl.utils
 
-import cash.grammar.kotlindsl.model.*
+import cash.grammar.kotlindsl.model.DependencyDeclaration
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Capability
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier.Companion.asSimpleIdentifier
+import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier.IdentifierElement
+import cash.grammar.kotlindsl.model.DependencyDeclarationElement
+import cash.grammar.kotlindsl.model.DependencyElement
+import cash.grammar.kotlindsl.model.NonDependencyDeclarationElement
 import cash.grammar.kotlindsl.model.gradle.DependencyContainer
 import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
@@ -13,6 +17,7 @@ import cash.grammar.kotlindsl.utils.Context.literalText
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
 import com.squareup.cash.grammar.KotlinParser.PostfixUnaryExpressionContext
 import com.squareup.cash.grammar.KotlinParser.SimpleIdentifierContext
+import com.squareup.cash.grammar.KotlinParser.ValueArgumentContext
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
@@ -22,6 +27,13 @@ public class DependencyExtractor(
   tokens: CommonTokenStream,
   indent: String,
 ) {
+
+  private enum class DeclarationDetectionResult {
+    DECLARATION_NORMAL,  // like `implementation("...") { ... }`
+    DECLARATION_COMPLEX, // like `implementation(group = "", name = "", version = "", configuration = "", classifier = "", ext = "") { ... }`
+    STATEMENT,           // not an obvious dependency declaration
+    ;
+  }
 
   private val comments = Comments(tokens, indent)
 
@@ -47,8 +59,18 @@ public class DependencyExtractor(
     return statements
       .map { stmt ->
         val leaf = stmt.leafRule()
-        if (leaf is PostfixUnaryExpressionContext && leaf.isDependencyDeclaration()) {
-          DependencyDeclarationElement(parseDependencyDeclaration(leaf), stmt)
+        if (leaf is PostfixUnaryExpressionContext) {
+          when (leaf.isDependencyDeclaration()) {
+            DeclarationDetectionResult.DECLARATION_NORMAL -> {
+              DependencyDeclarationElement(parseDependencyDeclaration(leaf), stmt)
+            }
+
+            DeclarationDetectionResult.DECLARATION_COMPLEX -> {
+              DependencyDeclarationElement(parseComplexDependencyDeclaration(leaf), stmt)
+            }
+
+            else -> NonDependencyDeclarationElement(stmt)
+          }
         } else {
           NonDependencyDeclarationElement(stmt)
         }
@@ -76,7 +98,8 @@ public class DependencyExtractor(
 
     return statements.mapNotNull { statement ->
       val leaf = statement.leafRule() as? PostfixUnaryExpressionContext ?: return@mapNotNull null
-      if (!leaf.isDependencyDeclaration()) return@mapNotNull null
+      // TODO(tsr): handle complex declaration?
+      if (leaf.isDependencyDeclaration() != DeclarationDetectionResult.DECLARATION_NORMAL) return@mapNotNull null
       DependencyDeclarationElement(parseDependencyDeclaration(leaf), statement)
     }.asContainer()
   }
@@ -91,6 +114,11 @@ public class DependencyExtractor(
       && blockStack[1].isBuildscript
   }
 
+  /**
+   * Parses a [DependencyDeclaration] out of a [declaration] in source code.
+   *
+   * @see [parseComplexDependencyDeclaration]
+   */
   private fun parseDependencyDeclaration(declaration: PostfixUnaryExpressionContext): DependencyDeclaration {
     // This is everything after the configuration, including optionally a trailing lambda
     val rawDependency = declaration.postfixUnarySuffix().single().callSuffix()
@@ -203,6 +231,89 @@ public class DependencyExtractor(
   }
 
   /**
+   * Given a declaration like
+   * ```
+   * implementation(group = "...", name = "...", version = ..., configuration = "...", classifier = "...", ext = "...") {
+   *   ...
+   * }
+   * ```
+   * ...where `version` can be either a String literal or a complex expression, for example
+   * ```
+   * version = "1.0" // 1
+   * version = libs.versions.foo.get() // 2
+   * ```
+   *
+   * Will return a [DependencyDeclaration].
+   *
+   * TODO(tsr): this method can only handle the simplest case of a "complex declaration" on a module dependency with
+   *  the default capability.
+   *
+   * @see [parseDependencyDeclaration]
+   */
+  private fun parseComplexDependencyDeclaration(declaration: PostfixUnaryExpressionContext): DependencyDeclaration {
+    // This is everything after the configuration, including optionally a trailing lambda
+    val rawDependency = declaration.postfixUnarySuffix().single().callSuffix()
+    val args = rawDependency.valueArguments().valueArgument()
+
+    // e.g., `classpath`, `implementation`, etc.
+    val configuration = declaration.primaryExpression().text
+    val capability = Capability.DEFAULT
+    val type = DependencyDeclaration.Type.MODULE
+
+    fun List<ValueArgumentContext>.valueOf(name: String): IdentifierElement? {
+      val expression = firstOrNull { it.simpleIdentifier().text == name }?.expression()
+      var value = expression?.let { literalText(it) }
+      val isString = value != null
+
+      // only `version` is permitted to not be a string literal
+      if (value == null && name == "version") {
+        value = expression?.text
+      }
+
+      return value?.let {
+        IdentifierElement(
+          value = value,
+          isStringLiteral = isString,
+        )
+      }
+    }
+
+    val group = args.valueOf("group") ?: error("missing group")
+    val name = args.valueOf("name") ?: error("missing name")
+    val version = args.valueOf("version")
+    val classifier = args.valueOf("classifier")
+    val ext = args.valueOf("ext")
+    val producerConfiguration = args.valueOf("configuration")
+
+    val identifier = if (version == null) {
+      "\"${group.value}:${name.value}\"".asSimpleIdentifier()
+    } else if (version.isStringLiteral) {
+      "\"${group.value}:${name.value}:${version.value}\"".asSimpleIdentifier()
+    } else {
+      // version is non-null and a complex expression (not a string literal)
+      "\"${group.value}:${name.value}:\${${version.value}}\"".asSimpleIdentifier()
+    }
+
+    val precedingComment = comments.getCommentsToLeft(declaration)
+    val fullText = declaration.fullText(input)
+      ?: error("Could not determine 'full text' of dependency declaration. Failed to parse expression:\n  ${declaration.text}")
+
+    return DependencyDeclaration(
+      configuration = configuration,
+      identifier = identifier
+        ?: error("Could not determine dependency identifier. Failed to parse expression:\n  `$fullText`"),
+      capability = capability,
+      type = type.or(identifier),
+      producerConfiguration = producerConfiguration?.value,
+      classifier = classifier?.value,
+      ext = ext?.value,
+      fullText = fullText,
+      precedingComment = precedingComment,
+      isComplex = true,
+    )
+  }
+
+  /**
    * The quotation marks are an important part of how the dependency is declared. Is it
    * ```
    * 1. "g:a:v", or
@@ -214,13 +325,46 @@ public class DependencyExtractor(
     return literalText(ctx)?.let { "\"$it\"" }
   }
 
-  private fun PostfixUnaryExpressionContext.isDependencyDeclaration(): Boolean {
+  private fun PostfixUnaryExpressionContext.isDependencyDeclaration(): DeclarationDetectionResult {
     // This is everything after the configuration, including optionally a trailing lambda
-    val rawDependency = this.postfixUnarySuffix().single().callSuffix()
+    val rawDependency = postfixUnarySuffix().single().callSuffix()
     val args = rawDependency.valueArguments().valueArgument()
 
     // If there are more than one argument, it's a function call, not a dependency declaration
-    return args.size <= 1
+    return if (args.size <= 1) {
+      DeclarationDetectionResult.DECLARATION_NORMAL
+    } else if (looksLikeComplexDeclaration(args)) {
+      DeclarationDetectionResult.DECLARATION_COMPLEX
+    } else {
+      DeclarationDetectionResult.STATEMENT
+    }
+  }
+
+  /**
+   * For example:
+   * ```
+   * implementation(group = "", name = "", version = "", configuration = "", classifier = "", ext = "") { ... }
+   * ```
+   */
+  private fun looksLikeComplexDeclaration(argContexts: List<ValueArgumentContext>): Boolean {
+    // max number of args
+    if (argContexts.size > 6) return false
+    val args = argContexts.mapNotNull { it.simpleIdentifier()?.text }
+
+    // Then some of our args don't match the expected form of `name = value`
+    if (args.size != argContexts.size) return false
+
+    val requiredArgs = setOf("group", "name")
+
+    // `group` and `name` are required arguments
+    if (!args.containsAll(requiredArgs)) return false
+
+    val validArgNames = listOf("group", "name", "version", "configuration", "classifier", "ext")
+    // We need a mutable list because each name can only be used once.
+    val argNames = validArgNames.toMutableList()
+
+    // Every arg in args must have a match in validArgNames AND `group` and `name` are required arguments
+    return args.all { argName -> argNames.remove(argName) }
   }
 
   private fun PostfixUnaryExpressionContext.findIdentifier(): Identifier? {

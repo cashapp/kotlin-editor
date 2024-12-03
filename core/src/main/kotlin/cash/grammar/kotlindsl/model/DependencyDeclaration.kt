@@ -35,12 +35,19 @@ package cash.grammar.kotlindsl.model
  * [ModuleDependency](https://docs.gradle.org/current/javadoc/org/gradle/api/artifacts/ModuleDependency.html).
  */
 public data class DependencyDeclaration(
+  // This is the configuration (required) this dependency is declared on
   val configuration: String,
   val identifier: Identifier,
   val capability: Capability,
   val type: Type,
   val fullText: String,
+  // This is the configuration (optional) that the producer publishes on
+  val producerConfiguration: String? = null,
+  val classifier: String? = null,
+  val ext: String? = null,
   val precedingComment: String? = null,
+  // A complex declaration will use the `implementation(name = ..., group = ..., [etc])` form
+  val isComplex: Boolean = false,
 ) {
 
   public data class Identifier @JvmOverloads constructor(
@@ -48,6 +55,12 @@ public data class DependencyDeclaration(
     public val configuration: String? = null,
     public val explicitPath: Boolean = false,
   ) {
+
+    // A helper class for use during parsing
+    internal class IdentifierElement(
+      val value: String,
+      val isStringLiteral: Boolean,
+    )
 
     /**
      * ```

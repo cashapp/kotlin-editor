@@ -40,7 +40,7 @@ internal class DependencyExtractorTest {
         add("extraImplementation", libs.fortyTwo)
         
         val complex = "a:complex:${'$'}expression"
-        
+                
         if (org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64")) {
           // Multi-line comment about why we're
           // doing this.
@@ -74,6 +74,51 @@ internal class DependencyExtractorTest {
             testImplementation("io.github.ganadist.sqlite4java:libsqlite4java-osx-aarch64:1.0.392")
           }
       """.trimIndent()
+    )
+  }
+
+  @Test fun `can parse complex declarations`() {
+    // Given
+    val buildScript = """
+      dependencies {
+        implementation(group = "com.foo", name = "bar", version = libs.versions.bar.get(), configuration = "ohno", classifier = "classified", ext = "why") {
+          isTransitive = false
+        }
+        
+        api(group = "com.foo", name = "bar", version = "1.0")
+      }
+    """.trimIndent()
+
+    // When
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "implementation",
+        identifier = "\"com.foo:bar:\${libs.versions.bar.get()}\"".asSimpleIdentifier()!!,
+        capability = DependencyDeclaration.Capability.DEFAULT,
+        type = DependencyDeclaration.Type.MODULE,
+        producerConfiguration = "ohno",
+        classifier = "classified",
+        ext = "why",
+        // The whitespace below is a bit wonky, but it's an artifact of the test fixture, not the API.
+        fullText = """
+            implementation(group = "com.foo", name = "bar", version = libs.versions.bar.get(), configuration = "ohno", classifier = "classified", ext = "why") {
+                isTransitive = false
+              }
+          """.trimIndent(),
+        precedingComment = null,
+        isComplex = true,
+      ),
+      DependencyDeclaration(
+        configuration = "api",
+        identifier = "\"com.foo:bar:1.0\"".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.MODULE,
+        fullText = """api(group = "com.foo", name = "bar", version = "1.0")""",
+        isComplex = true,
+      )
     )
   }
 
