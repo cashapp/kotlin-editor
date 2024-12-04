@@ -38,4 +38,17 @@ internal class DependenciesSimplifierTest {
       """.trimIndent()
     )
   }
+
+  @Test fun `can handle user weirdness`() {
+    // Expect parsing not to throw exception
+    DependenciesSimplifier.of(
+      """
+        dependencies {
+          tasks.withType<Foo>().configureEach {
+            doThing(listOf("--a", "b"))
+          }
+        }
+      """.trimIndent()
+    )
+  }
 }

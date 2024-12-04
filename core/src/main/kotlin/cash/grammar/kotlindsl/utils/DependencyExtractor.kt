@@ -326,6 +326,9 @@ public class DependencyExtractor(
   }
 
   private fun PostfixUnaryExpressionContext.isDependencyDeclaration(): DeclarationDetectionResult {
+    // Something strange
+    if (postfixUnarySuffix().size != 1) return DeclarationDetectionResult.STATEMENT
+
     // This is everything after the configuration, including optionally a trailing lambda
     val rawDependency = postfixUnarySuffix().single().callSuffix()
     val args = rawDependency.valueArguments().valueArgument()
