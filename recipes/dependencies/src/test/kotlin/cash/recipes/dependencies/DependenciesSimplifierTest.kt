@@ -51,4 +51,19 @@ internal class DependenciesSimplifierTest {
       """.trimIndent()
     )
   }
+
+  @Test fun `handles dependencies blocks that aren't actually dependencies blocks`() {
+    // Expect parsing not to throw exception
+    DependenciesSimplifier.of(
+      """
+        tasks.shadowJar {
+          dependencies {
+            exclude { dep ->
+              dep.name != "foo"
+            }
+          }
+        }
+      """.trimIndent()
+    )
+  }
 }

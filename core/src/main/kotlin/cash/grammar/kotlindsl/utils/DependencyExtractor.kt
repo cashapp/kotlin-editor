@@ -331,7 +331,9 @@ public class DependencyExtractor(
 
     // This is everything after the configuration, including optionally a trailing lambda
     val rawDependency = postfixUnarySuffix().single().callSuffix()
-    val args = rawDependency.valueArguments().valueArgument()
+    // Probably not actually a dependencies block
+    val valueArguments = rawDependency.valueArguments() ?: return DeclarationDetectionResult.STATEMENT
+    val args = valueArguments.valueArgument()
 
     // If there are more than one argument, it's a function call, not a dependency declaration
     return if (args.size <= 1) {
