@@ -66,4 +66,14 @@ internal class DependenciesSimplifierTest {
       """.trimIndent()
     )
   }
+
+  @Test fun `the project function doesn't require named arguments`() {
+    DependenciesSimplifier.of(
+      """
+        dependencies {
+          api(project(":imported-protos", "shadow"))
+        }
+      """.trimIndent()
+    )
+  }
 }
