@@ -115,14 +115,32 @@ public class DependenciesSimplifier private constructor(
   }
 
   public companion object {
+    /**
+     * Returns a [DependenciesSimplifier], which eagerly parses [buildScript].
+     *
+     * @throws IllegalStateException if [DependencyExtractor] sees an expression it doesn't understand.
+     */
+    @Throws(IllegalStateException::class)
     public fun of(buildScript: Path): DependenciesSimplifier {
       return of(Parser.readOnlyInputStream(buildScript))
     }
 
+    /**
+     * Returns a [DependenciesSimplifier], which eagerly parses [buildScript].
+     *
+     * @throws IllegalStateException if [DependencyExtractor] sees an expression it doesn't understand.
+     */
+    @Throws(IllegalStateException::class)
     public fun of(buildScript: String): DependenciesSimplifier {
       return of(buildScript.byteInputStream())
     }
 
+    /**
+     * Returns a [DependenciesSimplifier], which eagerly parses [buildScript].
+     *
+     * @throws IllegalStateException if [DependencyExtractor] sees an expression it doesn't understand.
+     */
+    @Throws(IllegalStateException::class)
     private fun of(buildScript: InputStream): DependenciesSimplifier {
       val errorListener = CollectingErrorListener()
 
