@@ -1,5 +1,9 @@
 # KotlinEditor
 
+## Version 0.14
+* [feat]: support parsing more complex dependency declarations.
+* [feat]: add `DependenciesSimplifier` recipe.
+
 ## Version 0.13
 * [fix]: maintain terminal newline in `CommentsInBlockRemover`.
 
