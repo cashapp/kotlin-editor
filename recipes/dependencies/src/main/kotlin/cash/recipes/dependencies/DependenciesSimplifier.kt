@@ -4,7 +4,6 @@ import cash.grammar.kotlindsl.model.DependencyDeclaration
 import cash.grammar.kotlindsl.parse.KotlinParseException
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.parse.Rewriter
-import cash.grammar.kotlindsl.utils.Blocks.isBuildscript
 import cash.grammar.kotlindsl.utils.Blocks.isDependencies
 import cash.grammar.kotlindsl.utils.CollectingErrorListener
 import cash.grammar.kotlindsl.utils.Context.leafRule
@@ -14,6 +13,7 @@ import cash.grammar.kotlindsl.utils.Whitespace.trimGently
 import cash.grammar.utils.ifNotEmpty
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
 import com.squareup.cash.grammar.KotlinParser.PostfixUnaryExpressionContext
+import com.squareup.cash.grammar.KotlinParser.ScriptContext
 import com.squareup.cash.grammar.KotlinParser.StatementContext
 import com.squareup.cash.grammar.KotlinParserBaseListener
 import org.antlr.v4.runtime.CharStream
@@ -34,7 +34,6 @@ public class DependenciesSimplifier private constructor(
   private val dependencyExtractor = DependencyExtractor(input, tokens, indent)
 
   private var changes = false
-  private var isInBuildscriptBlock = false
 
   public fun isChanged(): Boolean = changes
 
@@ -49,22 +48,22 @@ public class DependenciesSimplifier private constructor(
 
   override fun enterNamedBlock(ctx: NamedBlockContext) {
     dependencyExtractor.onEnterBlock()
-
-    if (ctx.isBuildscript) {
-      isInBuildscriptBlock = true
-    }
   }
 
   override fun exitNamedBlock(ctx: NamedBlockContext) {
-    if (ctx.isDependencies && !isInBuildscriptBlock) {
+    if (isRealDependenciesBlock(ctx)) {
       onExitDependenciesBlock(ctx)
     }
 
-    if (ctx.isBuildscript) {
-      isInBuildscriptBlock = false
-    }
-
     dependencyExtractor.onExitBlock()
+  }
+
+  private fun isRealDependenciesBlock(ctx: NamedBlockContext): Boolean {
+    // parent is StatementContext. Parent of that should be ScriptContext
+    // In contrast, with tasks.shadowJar { dependencies { ... } }, the parent.parent is StatementsContext
+    if (ctx.parent.parent !is ScriptContext) return false
+
+    return ctx.isDependencies
   }
 
   private fun onExitDependenciesBlock(ctx: NamedBlockContext) {
