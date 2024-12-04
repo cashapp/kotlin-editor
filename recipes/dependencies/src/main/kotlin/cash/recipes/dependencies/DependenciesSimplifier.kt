@@ -119,8 +119,9 @@ public class DependenciesSimplifier private constructor(
      * Returns a [DependenciesSimplifier], which eagerly parses [buildScript].
      *
      * @throws IllegalStateException if [DependencyExtractor] sees an expression it doesn't understand.
+     * @throws IllegalArgumentException if [DependencyExtractor] sees an expression it doesn't understand.
      */
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, IllegalArgumentException::class)
     public fun of(buildScript: Path): DependenciesSimplifier {
       return of(Parser.readOnlyInputStream(buildScript))
     }
@@ -129,8 +130,9 @@ public class DependenciesSimplifier private constructor(
      * Returns a [DependenciesSimplifier], which eagerly parses [buildScript].
      *
      * @throws IllegalStateException if [DependencyExtractor] sees an expression it doesn't understand.
+     * @throws IllegalArgumentException if [DependencyExtractor] sees an expression it doesn't understand.
      */
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, IllegalArgumentException::class)
     public fun of(buildScript: String): DependenciesSimplifier {
       return of(buildScript.byteInputStream())
     }
@@ -139,8 +141,9 @@ public class DependenciesSimplifier private constructor(
      * Returns a [DependenciesSimplifier], which eagerly parses [buildScript].
      *
      * @throws IllegalStateException if [DependencyExtractor] sees an expression it doesn't understand.
+     * @throws IllegalArgumentException if [DependencyExtractor] sees an expression it doesn't understand.
      */
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class, IllegalArgumentException::class)
     private fun of(buildScript: InputStream): DependenciesSimplifier {
       val errorListener = CollectingErrorListener()
 
