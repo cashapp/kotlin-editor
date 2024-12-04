@@ -223,6 +223,7 @@ public class DependencyExtractor(
       configuration = configuration,
       identifier = identifier
         ?: error("Could not determine dependency identifier. Failed to parse expression:\n  `$fullText`"),
+      producerConfiguration = identifier.configuration,
       capability = capability,
       type = type.or(identifier),
       fullText = fullText,
@@ -422,10 +423,6 @@ public class DependencyExtractor(
     val explicitPath = firstKey == "path" || secondKey == "path"
 
     if (firstKey == "path" || firstKey == null) {
-      require(secondKey == "configuration") {
-        "Expected 'configuration', was '$secondKey'."
-      }
-
       path = firstValue
       configuration = secondValue
     } else {

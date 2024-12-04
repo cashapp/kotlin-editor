@@ -2,6 +2,7 @@ package cash.grammar.kotlindsl.utils
 
 import cash.grammar.kotlindsl.model.DependencyDeclaration
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Capability
+import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Identifier.Companion.asSimpleIdentifier
 import cash.grammar.kotlindsl.model.DependencyDeclaration.Type
 import cash.grammar.kotlindsl.parse.Parser
@@ -210,6 +211,15 @@ internal class DependencyExtractorTest {
         type = Type.PROJECT,
       ),
       TestCase(
+        displayName = "project dependency on configuration",
+        fullText = """api(project(":foo", "shadow"))""",
+        configuration = "api",
+        identifier = Identifier(path = "\":foo\"", configuration = "\"shadow\""),
+        capability = Capability.DEFAULT,
+        type = Type.PROJECT,
+        producerConfiguration = "\"shadow\"",
+      ),
+      TestCase(
         displayName = "testFixtures capability for project dependency",
         fullText = "testImplementation(testFixtures(project(\":has-test-fixtures\")))",
         configuration = "testImplementation",
@@ -248,20 +258,45 @@ internal class DependencyExtractorTest {
     val displayName: String,
     val fullText: String,
     val configuration: String,
-    val identifier: String,
+    val identifier: Identifier,
     val capability: Capability,
     val type: Type,
+    val producerConfiguration: String? = null,
     val precedingComment: String? = null
   ) {
-    override fun toString(): String = displayName
 
-    fun toDependencyDeclaration() = DependencyDeclaration(
+    constructor(
+      displayName: String,
+      fullText: String,
+      configuration: String,
+      identifier: String,
+      capability: Capability,
+      type: Type,
+      producerConfiguration: String? = null,
+      precedingComment: String? = null
+    ) : this(
+      displayName = displayName,
+      fullText = fullText,
       configuration = configuration,
       identifier = identifier.asSimpleIdentifier()!!,
       capability = capability,
       type = type,
-      fullText = fullText,
+      producerConfiguration = producerConfiguration,
       precedingComment = precedingComment,
     )
+
+    override fun toString(): String = displayName
+
+    fun toDependencyDeclaration(): DependencyDeclaration {
+      return DependencyDeclaration(
+        configuration = configuration,
+        identifier = identifier,
+        capability = capability,
+        type = type,
+        fullText = fullText,
+        producerConfiguration = producerConfiguration,
+        precedingComment = precedingComment,
+      )
+    }
   }
 }
