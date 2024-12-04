@@ -1,5 +1,13 @@
 # KotlinEditor
 
+## Version 0.15
+* [feat]: add `isChanged()` to avoid rewriting unchanged files.
+* [fix]: parameter can be null.
+* [fix]: add `@Throws(IllegalStateException::class)` on `DependenciesSimplifier` factories.
+* [fix]: check size before calling `single()`. Declare `IllegalArgumentException` too.
+* [fix]: be stricter about what is a dependencies block we can parse.
+* [fix]: handle project declaration without named arguments.
+
 ## Version 0.14
 * [feat]: support parsing more complex dependency declarations.
 * [feat]: add `DependenciesSimplifier` recipe.
