@@ -33,7 +33,10 @@ public class DependenciesSimplifier private constructor(
   private val terminalNewlines = Whitespace.countTerminalNewlines(tokens)
   private val dependencyExtractor = DependencyExtractor(input, tokens, indent)
 
+  private var changes = false
   private var isInBuildscriptBlock = false
+
+  public fun isChanged(): Boolean = changes
 
   @Throws(KotlinParseException::class)
   public fun rewritten(): String {
@@ -76,6 +79,7 @@ public class DependenciesSimplifier private constructor(
         val newText = simplify(declaration)
 
         if (newText != null) {
+          changes = true
           rewriter.replace(elementCtx.start, getStop(elementCtx), newText)
         }
       }
