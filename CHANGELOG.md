@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.16
+* [feat]: add DependenciesMutator for rewriting dependency strings.
+
 ## Version 0.15
 * [feat]: add `isChanged()` to avoid rewriting unchanged files.
 * [fix]: parameter can be null.
