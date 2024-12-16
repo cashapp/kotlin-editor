@@ -13,6 +13,7 @@ import cash.grammar.kotlindsl.utils.Whitespace
 import cash.grammar.kotlindsl.utils.Whitespace.trimGently
 import cash.grammar.utils.ifNotEmpty
 import cash.recipes.plugins.exception.NonNormalizedScriptException
+import com.squareup.cash.grammar.KotlinParser.ImportListContext
 import com.squareup.cash.grammar.KotlinParser.NamedBlockContext
 import com.squareup.cash.grammar.KotlinParser.PostfixUnaryExpressionContext
 import com.squareup.cash.grammar.KotlinParser.ScriptContext
@@ -46,11 +47,14 @@ public class PluginMutator private constructor(
   private val pluginsToRemove: Set<String>,
 ) : KotlinParserBaseListener() {
 
+  // TODO(tsr): use System.lineSeparator() universally
+  private val newline = System.lineSeparator()
   private val rewriter = Rewriter(tokens)
   private val smartIndent = SmartIndent(tokens)
   private val terminalNewlines = Whitespace.countTerminalNewlines(tokens)
 
   private val blockStack = ArrayDeque<NamedBlockContext>()
+  private var importsList: ImportListContext? = null
   private var pluginsBlock: NamedBlockContext? = null
 
   private val pluginIds = mutableSetOf<String>()
@@ -63,7 +67,14 @@ public class PluginMutator private constructor(
       throw KotlinParseException.withErrors(it)
     }
 
-    return rewriter.text.trimGently(terminalNewlines)
+    return rewriter.text
+      // Simplifies conditional logic elsewhere. We never want two blank lines in a row.
+      .replace("$newline$newline$newline", "$newline$newline")
+      .trimGently(terminalNewlines)
+  }
+
+  override fun enterImportList(ctx: ImportListContext) {
+    importsList = ctx
   }
 
   override fun enterNamedBlock(ctx: NamedBlockContext) {
@@ -143,21 +154,30 @@ public class PluginMutator private constructor(
 
     rewriter.insertBefore(
       tokenToInsertBefore,
-      contentToAdd.joinToString(separator = "\n") + "\n"
+      contentToAdd.joinToString(separator = newline) + newline
     )
   }
 
   private fun addNewPluginBlock(script: ScriptContext) {
     if (pluginsToAdd.isEmpty()) return
 
+    val hasImports = importsList != null
+
     val pluginsContentToAdd: List<String> = pluginContentToAdd(emptyList())
     val pluginBlockContent = buildString {
+      if (hasImports) {
+        appendLine()
+      }
+
       appendLine("plugins {")
       pluginsContentToAdd.forEach { appendLine(it) }
-      append("}")
+      appendLine("}")
+      appendLine()
     }
 
-    rewriter.insertBefore(script.start, "$pluginBlockContent\n\n")
+    val insertLocation = importsList?.stop ?: script.start
+
+    rewriter.insertBefore(insertLocation, pluginBlockContent)
   }
 
   private fun removeBlockIdPlugins(ctx: List<ParserRuleContext>) {

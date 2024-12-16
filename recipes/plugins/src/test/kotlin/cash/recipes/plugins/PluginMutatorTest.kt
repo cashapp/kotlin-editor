@@ -93,6 +93,41 @@ internal class PluginMutatorTest {
   }
 
   @Test
+  fun `can add plugins when no existing plugin block is present, below imports`() {
+    val pluginToAdd = setOf("foo", "bar")
+    val pluginsToRemove = emptySet<String>()
+
+    val buildScript =
+      """
+        import magic
+        
+        extension {
+          foo = bar
+        }
+      """.trimIndent()
+
+    // When...
+    val pluginMutator = PluginMutator.of(buildScript, pluginToAdd, pluginsToRemove)
+    val rewrittenContent = pluginMutator.rewritten()
+    val expectedContent =
+      """
+        import magic
+        
+        plugins {
+          id("foo")
+          id("bar")
+        }
+
+        extension {
+          foo = bar
+        }
+      """.trimIndent()
+
+    // Then...
+    assertThat(rewrittenContent).isEqualTo(expectedContent)
+  }
+
+  @Test
   fun `skip adding plugins that are already present`() {
     val pluginToAdd = setOf("cash.server")
     val pluginsToRemove = emptySet<String>()
@@ -184,7 +219,7 @@ internal class PluginMutatorTest {
 
   @Test
   fun `throw error when same plugins are in add and remove sets`() {
-    val pluginToAdd =  setOf("bar")
+    val pluginToAdd = setOf("bar")
     val pluginToRemove = setOf("foo", "bar")
 
     val buildScript =
@@ -202,7 +237,7 @@ internal class PluginMutatorTest {
 
   @Test
   fun `throws error for non-normalized script, with non-BlockId plugins`() {
-    val pluginToAdd =  setOf("foo")
+    val pluginToAdd = setOf("foo")
     val pluginToRemove = setOf("bar")
 
     val buildScript =
@@ -220,7 +255,7 @@ internal class PluginMutatorTest {
 
   @Test
   fun `throws error for non-normalized script, with apply plugins`() {
-    val pluginToAdd =  setOf("foo")
+    val pluginToAdd = setOf("foo")
     val pluginToRemove = setOf("bar")
 
     val buildScript =
