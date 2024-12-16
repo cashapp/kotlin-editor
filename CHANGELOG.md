@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.17
+* [fix]: add plugins block below imports, if any.
+
 ## Version 0.16
 * [feat]: add DependenciesMutator for rewriting dependency strings.
 
