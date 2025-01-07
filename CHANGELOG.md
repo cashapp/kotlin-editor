@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.18
+* [chore]: update antlr to 4.13.2 (latest).
+
 ## Version 0.17
 * [fix]: add plugins block below imports, if any.
 
