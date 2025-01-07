@@ -35,11 +35,6 @@ dependencies {
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinGradlePluginApi)
   implementation(libs.mavenPublish)
-
-  testImplementation(libs.assertj)
-  testImplementation(libs.junit.jupiter.api)
-
-  testRuntimeOnly(libs.junit.jupiter.engine)
 }
 
 val javaTarget = JavaLanguageVersion.of(libs.versions.java.get())
