@@ -47,7 +47,7 @@ internal class BasePlugin(private val project: Project) {
 
   private fun Project.configurePublishing() {
     extensions.getByType(MavenPublishBaseExtension::class.java).run {
-      publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
+      publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
       signAllPublications()
 
       pom { p ->
