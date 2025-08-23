@@ -139,11 +139,10 @@ public object Whitespace {
       var nonEmptyLine = false
 
       for (c in line.toCharArray()) {
-        // Avoid pulling indentation from comments
-        if (line.startsWith(" *")) continue
-
         if (c == ' ' || c == '\t') {
           indent += c
+        } else if(c == '*') {
+            break
         } else {
           nonEmptyLine = true
           break
