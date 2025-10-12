@@ -192,13 +192,24 @@ internal class WhitespaceTest {
         expectedIndent = "\t",
       ),
         TestCase(
-            displayName = "maintains indentation when comments are present",
+            displayName = "maintains indentation when comments (/*) are present",
             sourceText = """
           /*
            * Copyright (C) 2018 Square, Inc.
            * SPDX-License-Identifier: Apache 2.0
            */
           package com.example
+          
+          class Foo
+        """.trimIndent(),
+            expectedIndent = "  ",
+        ),
+        TestCase(
+            displayName = "maintains indentation when comments (//) are present",
+            sourceText = """
+        // Copyright (C) 2018 Square, Inc.
+        // SPDX-License-Identifier: Apache-2.0
+        package com.example
           
           class Foo
         """.trimIndent(),
