@@ -192,7 +192,7 @@ internal class WhitespaceTest {
         expectedIndent = "\t",
       ),
         TestCase(
-            displayName = "maintains indentation when comments (/*) are present",
+            displayName = "maintains indentation when block comment copyright is present",
             sourceText = """
           /*
            * Copyright (C) 2018 Square, Inc.
@@ -205,7 +205,7 @@ internal class WhitespaceTest {
             expectedIndent = "  ",
         ),
         TestCase(
-            displayName = "maintains indentation when comments (//) are present",
+            displayName = "maintains indentation when line comment copyright is present",
             sourceText = """
         // Copyright (C) 2018 Square, Inc.
         // SPDX-License-Identifier: Apache-2.0
