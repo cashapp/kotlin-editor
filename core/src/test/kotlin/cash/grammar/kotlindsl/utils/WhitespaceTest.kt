@@ -191,6 +191,30 @@ internal class WhitespaceTest {
         defaultIndent = "\t",
         expectedIndent = "\t",
       ),
+        TestCase(
+            displayName = "maintains indentation when block comment copyright is present",
+            sourceText = """
+          /*
+           * Copyright (C) 2018 Square, Inc.
+           * SPDX-License-Identifier: Apache 2.0
+           */
+          package com.example
+          
+          class Foo
+        """.trimIndent(),
+            expectedIndent = "  ",
+        ),
+        TestCase(
+            displayName = "maintains indentation when line comment copyright is present",
+            sourceText = """
+        // Copyright (C) 2018 Square, Inc.
+        // SPDX-License-Identifier: Apache-2.0
+        package com.example
+          
+          class Foo
+        """.trimIndent(),
+            expectedIndent = "  ",
+        ),
     )
   }
 

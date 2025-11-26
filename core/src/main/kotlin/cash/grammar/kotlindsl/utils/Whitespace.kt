@@ -141,6 +141,8 @@ public object Whitespace {
       for (c in line.toCharArray()) {
         if (c == ' ' || c == '\t') {
           indent += c
+        } else if(c == '*') {
+            break
         } else {
           nonEmptyLine = true
           break
