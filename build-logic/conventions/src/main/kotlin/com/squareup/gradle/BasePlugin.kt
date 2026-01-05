@@ -2,10 +2,10 @@ package com.squareup.gradle
 
 import com.squareup.gradle.utils.DependencyCatalog
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 internal class BasePlugin(private val project: Project) {
@@ -37,9 +37,9 @@ internal class BasePlugin(private val project: Project) {
     }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-      tasks.withType(KotlinJvmCompile::class.java).configureEach {
-        it.kotlinOptions {
-          jvmTarget = javaVersion.toString()
+      tasks.withType(KotlinJvmCompile::class.java).configureEach { t ->
+        t.compilerOptions {
+          jvmTarget.set(JvmTarget.fromTarget(javaVersion.toString()))
         }
       }
     }
@@ -47,7 +47,7 @@ internal class BasePlugin(private val project: Project) {
 
   private fun Project.configurePublishing() {
     extensions.getByType(MavenPublishBaseExtension::class.java).run {
-      publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+      publishToMavenCentral(automaticRelease = true, validateDeployment = false)
       signAllPublications()
 
       pom { p ->

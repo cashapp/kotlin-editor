@@ -40,6 +40,7 @@ public class LibraryConventionPlugin : Plugin<Project> {
       add("testImplementation", versionCatalog.findLibrary("assertj").orElseThrow())
       add("testImplementation", versionCatalog.findLibrary("junit.jupiter.api").orElseThrow())
       add("testRuntimeOnly", versionCatalog.findLibrary("junit.jupiter.engine").orElseThrow())
+      add("testRuntimeOnly", versionCatalog.findLibrary("junit.platform.launcher").orElseThrow())
     }
 
     // These default dependencies are added to all library modules. Don't warn/fail if they're not

@@ -1,11 +1,14 @@
 [versions]
 antlr = "4.13.2"
-dependencyAnalysis = "2.6.1"
-develocity = "3.19"
+dependencyAnalysis = "3.5.1"
+# Keep this version in sync with settings script
+develocity = "4.3"
 java = "11"
-junit-jupiter = "5.11.4"
-kotlin = "1.9.25"
-mavenPublish = "0.30.0"
+junit-jupiter = "5.14.1"
+junit-launcher = "1.14.1"
+# or 2.2.21, or 2.3.0
+kotlin = "2.1.21"
+mavenPublish = "0.35.0"
 
 [libraries]
 # antlr-core is referenced from build-logic
@@ -19,7 +22,8 @@ develocityPlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref
 # note that the junit-jupiter-engine dependency depends on junit-bom
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
-junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version = "junit-jupiter" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-launcher" }
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinGradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
