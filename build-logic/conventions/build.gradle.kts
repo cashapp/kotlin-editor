@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -50,8 +51,8 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.withType<KotlinCompile> {
-  kotlinOptions {
-    jvmTarget = javaTarget.toString()
+  compilerOptions {
+    jvmTarget = JvmTarget.fromTarget(javaTarget.toString())
   }
 }
 
