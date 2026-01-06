@@ -1,5 +1,12 @@
 package cash.recipes.lint.buildscripts.model
 
+import java.nio.file.Path
+
+public data class Statements(
+  public val buildScript: Path,
+  public val statements: List<Statement>,
+)
+
 /**
  * TODO: docs.
  */

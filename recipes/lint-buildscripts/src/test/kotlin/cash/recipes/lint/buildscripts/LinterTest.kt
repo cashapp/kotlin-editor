@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import kotlin.io.path.name
 import kotlin.io.path.writeText
 
 internal class LinterTest {
@@ -60,6 +61,7 @@ internal class LinterTest {
     val forbiddenStatements = linter.getForbiddenStatements()
 
     // Then
-    assertThat(forbiddenStatements.map { it.text }).containsExactly("tasks", "tasks.jar {")
+    assertThat(forbiddenStatements.statements.map { it.text }).containsExactly("tasks", "tasks.jar {")
+    assertThat(forbiddenStatements.buildScript.name).isEqualTo("build.gradle.kts")
   }
 }

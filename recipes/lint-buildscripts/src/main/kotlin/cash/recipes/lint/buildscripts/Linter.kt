@@ -1,6 +1,6 @@
 package cash.recipes.lint.buildscripts
 
-import cash.recipes.lint.buildscripts.model.Statement
+import cash.recipes.lint.buildscripts.model.Statements
 import cash.recipes.lint.buildscripts.parser.BuildscriptTopLevelStatementExtractor
 import java.nio.file.Path
 
@@ -10,8 +10,11 @@ public class Linter private constructor(
   private val allowList: AllowList,
 ) {
 
-  public fun getForbiddenStatements(): List<Statement> {
-    return allowList.forbiddenStatements(extractor.value.getStatements())
+  public fun getForbiddenStatements(): Statements {
+    return Statements(
+      buildScript,
+      allowList.forbiddenStatements(extractor.value.getStatements()),
+    )
   }
 
   public companion object {
