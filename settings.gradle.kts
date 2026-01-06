@@ -26,5 +26,7 @@ dependencyResolutionManagement {
 include(":core")
 include(":grammar")
 include(":recipes:dependencies")
+include(":recipes:guardrails:gradle-guard")
+include(":recipes:guardrails:gradle-guard-lib")
 include(":recipes:plugins")
 include(":recipes:repos")

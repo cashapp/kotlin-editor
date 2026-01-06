@@ -6,6 +6,7 @@ import com.squareup.cash.grammar.KotlinParser.PostfixUnaryExpressionContext
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.misc.Interval
+import kotlin.jvm.Throws
 
 public object Context {
 
@@ -44,6 +45,26 @@ public object Context {
     }
 
     return tree
+  }
+
+  // TODO
+  @Throws(IllegalStateException::class)
+  public fun ParserRuleContext.singleChildOrThrow(): ParserRuleContext {
+    if (childCount == 1) {
+      val child = getChild(0)
+      return child as? ParserRuleContext
+        ?: error("Expected $this to have a single child that was a ParserRuleContext. Was ${child.javaClass.simpleName}.")
+    }
+
+    error("Expected $this to have a single child. Had $childCount children.")
+  }
+
+  // TODO
+  @Throws(IllegalStateException::class)
+  public fun ParserRuleContext.lastChildOrThrow(): ParserRuleContext {
+    val child = getChild(childCount - 1)
+    return child as? ParserRuleContext
+      ?: error("Expected the last child of $this to be a ParserRuleContext. Was ${child.javaClass.simpleName}.")
   }
 
   /**

@@ -1,0 +1,17 @@
+allowed_blocks:
+  - "plugins"
+  - "dependencies"
+  - "application"
+  - "gradlePlugin"
+  - "java"
+  - "kotlin"
+  - "dependencyAnalysis"
+
+allowed_prefixes:
+  - "val javaTarget ="
+  - "tasks.withType"
+  - "tasks.named"
+
+ignored_paths:
+  - "settings.gradle.kts"
+  - "build-logic/settings.gradle.kts"

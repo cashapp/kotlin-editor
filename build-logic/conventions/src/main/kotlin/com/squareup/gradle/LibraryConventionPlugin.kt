@@ -8,8 +8,14 @@ import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
-@Suppress("unused")
-public class LibraryConventionPlugin : Plugin<Project> {
+/**
+ * ```
+ * plugins {
+ *   id("cash.lib")
+ * }
+ * ```
+ */
+public abstract class LibraryConventionPlugin : Plugin<Project> {
 
   private lateinit var versionCatalog: VersionCatalog
 
