@@ -2,7 +2,14 @@ package cash.recipes.lint.buildscripts.utils
 
 internal object BuildScripts {
 
-  val one = """
+  val noViolations = """
+    plugins {
+      id("foo")
+      alias(libs.plugins.bar)
+    }
+  """.trimIndent()
+
+  val hasViolations1 = """
       plugins {
         id("foo")
         alias(libs.plugins.bar)
@@ -35,5 +42,14 @@ internal object BuildScripts {
       tasks.jar {
         archiveClassifier.set("unshaded")
       }
+    """.trimIndent()
+
+  val hasViolations2 = """
+      plugins {
+        id("foo")
+        alias(libs.plugins.bar)
+      }
+      
+      val foo = 1
     """.trimIndent()
 }

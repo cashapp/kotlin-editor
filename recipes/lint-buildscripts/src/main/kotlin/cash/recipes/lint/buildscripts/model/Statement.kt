@@ -2,7 +2,17 @@ package cash.recipes.lint.buildscripts.model
 
 import java.nio.file.Path
 
-public data class Statements(
+/**
+ * A collection of [reports], each for a single [Report.buildScript]. [root] is at the root of the directory hierarchy
+ * that contains each of these build scripts. May be null.
+ */
+public data class ReportCollection(
+  public val root: Path?,
+  public val reports: List<Report>,
+)
+
+/** A report of [statements] for a single [buildScript]. */
+public data class Report(
   public val buildScript: Path,
   public val statements: List<Statement>,
 )
