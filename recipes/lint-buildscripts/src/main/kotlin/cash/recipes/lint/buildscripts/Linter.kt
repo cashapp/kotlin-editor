@@ -6,22 +6,25 @@ import java.nio.file.Path
 
 public class Linter private constructor(
   private val extractor: Lazy<BuildscriptTopLevelStatementExtractor>,
-  private val buildScript: Path,
   private val allowList: AllowList,
+  private val buildScript: Path,
+  private val root: Path?,
 ) {
 
   public fun getForbiddenStatements(): Statements {
+    val printablePath = root?.relativize(buildScript) ?: buildScript
+
     return Statements(
-      buildScript,
+      printablePath,
       allowList.forbiddenStatements(extractor.value.getStatements()),
     )
   }
 
   public companion object {
-    public fun of(buildScript: Path, allowList: AllowList): Linter {
+    public fun of(allowList: AllowList, buildScript: Path, root: Path? = null): Linter {
       val extractor = lazy(LazyThreadSafetyMode.NONE) { (BuildscriptTopLevelStatementExtractor.of(buildScript)) }
 
-      return Linter(extractor, buildScript, allowList)
+      return Linter(extractor, allowList = allowList, buildScript = buildScript, root = root)
     }
   }
 }

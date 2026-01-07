@@ -1,0 +1,39 @@
+package cash.recipes.lint.buildscripts.utils
+
+internal object BuildScripts {
+
+  val one = """
+      plugins {
+        id("foo")
+        alias(libs.plugins.bar)
+      }
+      
+      dependencies {
+        constraints {
+          implementation("com.foo:bar") {
+            version {
+              require("1")
+            }
+          }
+        }
+      
+        implementation(libs.foo)
+        api("com.foo:bar:1.0")
+        runtimeOnly(group = "foo", name = "bar", version = "2.0")
+        compileOnly(group = "foo", name = "bar", version = libs.versions.bar.get()) {
+          isTransitive = false
+        }
+        devImplementation(group = "io.netty", name = "netty-transport-native-kqueue", classifier = "osx-x86_64")
+      }
+      
+      tasks {
+        jar {
+          archiveClassifier.set("unshaded")
+        }
+      }
+      
+      tasks.jar {
+        archiveClassifier.set("unshaded")
+      }
+    """.trimIndent()
+}

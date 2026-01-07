@@ -2,6 +2,7 @@ package cash.recipes.lint.buildscripts.parser
 
 import cash.recipes.lint.buildscripts.model.Position
 import cash.recipes.lint.buildscripts.model.Statement
+import cash.recipes.lint.buildscripts.utils.BuildScripts
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -10,43 +11,9 @@ internal class BuildscriptTopLevelStatementExtractorTest {
   @Test
   fun `can simplify dependency declarations`() {
     // Given
-    val buildScript = """
-      plugins {
-        id("foo")
-        alias(libs.plugins.bar)
-      }
-      
-      dependencies {
-        constraints {
-          implementation("com.foo:bar") {
-            version {
-              require("1")
-            }
-          }
-        }
-      
-        implementation(libs.foo)
-        api("com.foo:bar:1.0")
-        runtimeOnly(group = "foo", name = "bar", version = "2.0")
-        compileOnly(group = "foo", name = "bar", version = libs.versions.bar.get()) {
-          isTransitive = false
-        }
-        devImplementation(group = "io.netty", name = "netty-transport-native-kqueue", classifier = "osx-x86_64")
-      }
-      
-      tasks {
-        jar {
-          archiveClassifier.set("unshaded")
-        }
-      }
-      
-      tasks.jar {
-        archiveClassifier.set("unshaded")
-      }
-    """.trimIndent()
+    val linter = BuildscriptTopLevelStatementExtractor.of(BuildScripts.one)
 
     // When
-    val linter = BuildscriptTopLevelStatementExtractor.of(buildScript)
     val namedBlocks = linter.getStatements()
 
     // Then

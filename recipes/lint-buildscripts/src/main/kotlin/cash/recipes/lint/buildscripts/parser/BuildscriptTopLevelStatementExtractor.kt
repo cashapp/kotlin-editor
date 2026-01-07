@@ -20,7 +20,7 @@ import java.nio.file.Path
 /**
  * Extracts all the top-level statements from a buildscript.
  */
-public class BuildscriptTopLevelStatementExtractor private constructor(
+internal class BuildscriptTopLevelStatementExtractor private constructor(
   private val input: CharStream,
   private val tokens: CommonTokenStream,
   private val errorListener: CollectingErrorListener,
@@ -29,7 +29,7 @@ public class BuildscriptTopLevelStatementExtractor private constructor(
   private val statements = mutableListOf<Statement>()
   private val statementsHelper = Statements()
 
-  public fun getStatements(): List<Statement> = statements
+  fun getStatements(): List<Statement> = statements
 
   override fun enterStatement(ctx: KotlinParser.StatementContext) {
     statementsHelper.onEnterStatement()
@@ -85,18 +85,18 @@ public class BuildscriptTopLevelStatementExtractor private constructor(
     return Position(line = line, positionInLine = charPositionInLine)
   }
 
-  public companion object {
+  companion object {
     /**
      * Returns a [BuildscriptTopLevelStatementExtractor], which eagerly parses [buildScript].
      */
-    public fun of(buildScript: Path): BuildscriptTopLevelStatementExtractor {
+    fun of(buildScript: Path): BuildscriptTopLevelStatementExtractor {
       return of(Parser.Companion.readOnlyInputStream(buildScript))
     }
 
     /**
      * Returns a [BuildscriptTopLevelStatementExtractor], which eagerly parses [buildScript].
      */
-    public fun of(buildScript: String): BuildscriptTopLevelStatementExtractor {
+    fun of(buildScript: String): BuildscriptTopLevelStatementExtractor {
       return of(buildScript.byteInputStream())
     }
 
