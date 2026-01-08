@@ -18,13 +18,15 @@ public class Linter private constructor(
   private val _reports by lazy(LazyThreadSafetyMode.NONE) {
     val statements = getBuildScripts()
       .map { buildScript ->
-        val printablePath = if (path == buildScript) path.last() else path.relativize(buildScript)
+        // We want the path to the build script relative to the root (`path`). In the case where `path` IS the build
+        // script, then the relative path is just the last part of the `path`
+        val relativePath = if (path == buildScript) path.last() else path.relativize(buildScript)
 
         val extractor = BuildscriptTopLevelStatementExtractor.of(buildScript)
 
         Report(
-          printablePath,
-          allowList.forbiddenStatements(extractor.getStatements()),
+          relativePath,
+          allowList.forbiddenStatements(relativePath, extractor.getStatements()),
         )
       }
       .toList()

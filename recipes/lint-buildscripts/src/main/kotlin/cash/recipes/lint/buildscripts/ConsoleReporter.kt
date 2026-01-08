@@ -1,6 +1,7 @@
 package cash.recipes.lint.buildscripts
 
 import cash.recipes.lint.buildscripts.model.Position
+import cash.recipes.lint.buildscripts.model.Report
 import cash.recipes.lint.buildscripts.model.Statement
 
 public interface Logger {
@@ -33,28 +34,7 @@ public class ConsoleReporter private constructor(private val linter: Linter, pri
       val msg = if (report.statements.isEmpty()) {
         "The build script '${report.buildScript}' contains no forbidden statements."
       } else {
-        buildString {
-          val count = report.statements.size
-          val statement = if (count != 1) "statements" else "statement"
-
-          appendLine("The build script '${report.buildScript}' contains $count forbidden $statement:")
-          appendLine()
-
-          report.statements.forEachIndexed { i, stmt ->
-            val number = "${i + 1}: "
-            appendLine("$number${stmt.richText()}")
-
-            append(" ".repeat(number.length))
-            appendLine(stmt.startIndex())
-            append(" ".repeat(number.length))
-            appendLine(stmt.stopIndex())
-
-            // Add an empty line separating items, but don't at the end.
-            if (i < count - 1) {
-              appendLine()
-            }
-          }
-        }
+        buildString { buildReport(report) }
       }
 
       logger.print(msg)
@@ -66,7 +46,6 @@ public class ConsoleReporter private constructor(private val linter: Linter, pri
       val filesWithViolations = reports.reports.count { it.statements.isNotEmpty() }
       val filesWithoutViolations = reports.reports.size - filesWithViolations
 
-      // TODO: plurals
       appendLine("Analysis complete. In path ${reports.root!!}, found:")
       appendLine("- $filesWithoutViolations without any violations.")
       appendLine("- $filesWithViolations with violations.")
@@ -76,26 +55,7 @@ public class ConsoleReporter private constructor(private val linter: Linter, pri
       val nonEmptyReportsCount = nonEmptyReports.size
 
       nonEmptyReports.forEachIndexed { i, report ->
-        val count = report.statements.size
-        val statement = if (count != 1) "statements" else "statement"
-
-        appendLine("The build script '${report.buildScript}' contains $count forbidden $statement:")
-        appendLine()
-
-        report.statements.forEachIndexed { j, stmt ->
-          val number = "${j + 1}: "
-          appendLine("$number${stmt.richText()}")
-
-          append(" ".repeat(number.length))
-          appendLine(stmt.startIndex())
-          append(" ".repeat(number.length))
-          appendLine(stmt.stopIndex())
-
-          // Add an empty line separating items, but don't at the end.
-          if (j < count - 1) {
-            appendLine()
-          }
-        }
+        buildReport(report)
 
         // Add an empty line separating items, but don't at the end.
         if (i < nonEmptyReportsCount - 1) {
@@ -105,6 +65,29 @@ public class ConsoleReporter private constructor(private val linter: Linter, pri
     }
 
     logger.print(msg)
+  }
+
+  private fun StringBuilder.buildReport(report: Report) {
+    val count = report.statements.size
+    val statement = if (count != 1) "statements" else "statement"
+
+    appendLine("The build script '${report.buildScript}' contains $count forbidden $statement:")
+    appendLine()
+
+    report.statements.forEachIndexed { i, stmt ->
+      val number = "${i + 1}: "
+      appendLine("$number${stmt.richText()}")
+
+      append(" ".repeat(number.length))
+      appendLine(stmt.startIndex())
+      append(" ".repeat(number.length))
+      appendLine(stmt.stopIndex())
+
+      // Add an empty line separating items, but don't at the end.
+      if (i < count - 1) {
+        appendLine()
+      }
+    }
   }
 
   private fun Statement.richText(): String {
