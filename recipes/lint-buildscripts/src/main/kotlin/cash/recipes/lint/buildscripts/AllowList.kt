@@ -20,5 +20,15 @@ public class AllowList private constructor(private val specs: List<Spec>) {
 
       return AllowList(listOf(spec))
     }
+
+    public fun of(spec: Spec): AllowList {
+      return AllowList(listOf(spec))
+    }
+
+    public fun of(specs: Iterable<Spec>): AllowList {
+      return AllowList(specs.toList())
+    }
+
+    // TODO: a function that takes a yaml file
   }
 }
