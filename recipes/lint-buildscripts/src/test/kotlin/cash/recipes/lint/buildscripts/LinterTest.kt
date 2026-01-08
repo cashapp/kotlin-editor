@@ -19,7 +19,7 @@ internal class LinterTest {
     val buildScript = tempDir.resolve("build.gradle.kts").withContent(BuildScripts.hasViolations1)
 
     val allowList = AllowList.of("plugins", "dependencies")
-    val linter = Linter.of(allowList, buildScript, tempDir)
+    val linter = Linter.of(allowList, buildScript)
 
     // When
     val forbiddenStatements = linter.getReports().reports.single()

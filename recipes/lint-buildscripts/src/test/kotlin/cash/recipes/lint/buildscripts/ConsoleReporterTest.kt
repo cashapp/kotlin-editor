@@ -7,14 +7,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
-import kotlin.io.path.writeText
 
 class ConsoleReporterTest {
 
   @TempDir
   lateinit var tempDir: Path
 
-  @Test fun `no report when no violations`() {
+  @Test
+  fun `no report when no violations`() {
     // Given
     tempDir.resolve("build.gradle.kts").withContent(BuildScripts.noViolations)
     val allowList = AllowList.of("plugins", "dependencies")
@@ -39,7 +39,7 @@ class ConsoleReporterTest {
     // Given
     val buildScript = tempDir.resolve("build.gradle.kts").withContent(BuildScripts.hasViolations1)
     val allowList = AllowList.of("plugins", "dependencies")
-    val linter = Linter.of(allowList, buildScript, tempDir)
+    val linter = Linter.of(allowList, buildScript)
     val logger = TestLogger()
 
     // When
