@@ -19,47 +19,38 @@ public class ConsoleReporter private constructor(private val linter: Linter, pri
   public fun printReport() {
     val reports = linter.getReports()
 
-    // TODO: clean this up
-
-    // The case where there are no violations anywhere
-    if (reports.reports.all { it.statements.isEmpty() }) {
-      logger.print("None of the build scripts found in ${reports.root} contain forbidden statements.")
-      return
-    }
-
-    // The case where there is only a single file analyzed
-    if (reports.reports.size == 1) {
+    val msg = if (reports.reports.all { it.statements.isEmpty() }) {
+      // The case where there are no violations anywhere
+      "None of the build scripts found in ${reports.root} contain forbidden statements."
+    } else if (reports.reports.size == 1) {
+      // The case where there is only a single file analyzed
       val report = reports.reports.single()
 
-      val msg = if (report.statements.isEmpty()) {
+      if (report.statements.isEmpty()) {
         "The build script '${report.buildScript}' contains no forbidden statements."
       } else {
         buildString { buildReport(report) }
       }
+    } else {
+      buildString {
+        val filesWithViolations = reports.reports.count { it.statements.isNotEmpty() }
+        val filesWithoutViolations = reports.reports.size - filesWithViolations
 
-      logger.print(msg)
-      return
-    }
+        appendLine("Analysis complete. In path ${reports.root!!}, found:")
+        appendLine("- $filesWithoutViolations without any violations.")
+        appendLine("- $filesWithViolations with violations.")
+        appendLine()
 
-    // The most general case where there are multiple files analyzed
-    val msg = buildString {
-      val filesWithViolations = reports.reports.count { it.statements.isNotEmpty() }
-      val filesWithoutViolations = reports.reports.size - filesWithViolations
+        val nonEmptyReports = reports.reports.filter { it.statements.isNotEmpty() }
+        val nonEmptyReportsCount = nonEmptyReports.size
 
-      appendLine("Analysis complete. In path ${reports.root!!}, found:")
-      appendLine("- $filesWithoutViolations without any violations.")
-      appendLine("- $filesWithViolations with violations.")
-      appendLine()
+        nonEmptyReports.forEachIndexed { i, report ->
+          buildReport(report)
 
-      val nonEmptyReports = reports.reports.filter { it.statements.isNotEmpty() }
-      val nonEmptyReportsCount = nonEmptyReports.size
-
-      nonEmptyReports.forEachIndexed { i, report ->
-        buildReport(report)
-
-        // Add an empty line separating items, but don't at the end.
-        if (i < nonEmptyReportsCount - 1) {
-          appendLine()
+          // Add an empty line separating items, but don't at the end.
+          if (i < nonEmptyReportsCount - 1) {
+            appendLine()
+          }
         }
       }
     }
