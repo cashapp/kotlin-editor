@@ -128,9 +128,7 @@ public object Blocks {
     return enclosingNamedBlock(ctx, name) != null
   }
 
-  /**
-   * The inverse of [isInNamedBlock].
-   */
+  /** The inverse of [isInNamedBlock]. */
   public fun isNotInNamedBlock(ctx: ParserRuleContext, name: String? = null): Boolean {
     return !isInNamedBlock(ctx, name)
   }
