@@ -1,5 +1,6 @@
 package cash.recipes.lint.buildscripts
 
+import cash.recipes.lint.buildscripts.config.AllowList
 import cash.recipes.lint.buildscripts.model.Report
 import cash.recipes.lint.buildscripts.model.ReportCollection
 import cash.recipes.lint.buildscripts.parser.BuildscriptTopLevelStatementExtractor

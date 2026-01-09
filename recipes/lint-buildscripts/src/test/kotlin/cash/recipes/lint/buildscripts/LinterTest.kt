@@ -1,5 +1,6 @@
 package cash.recipes.lint.buildscripts
 
+import cash.recipes.lint.buildscripts.config.AllowList
 import cash.recipes.lint.buildscripts.model.Position
 import cash.recipes.lint.buildscripts.model.Statement
 import cash.recipes.lint.buildscripts.utils.BuildScripts
