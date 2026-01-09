@@ -59,6 +59,14 @@ public object Context {
     error("Expected $this to have a single child. Had $childCount children.")
   }
 
+  // TODO
+  @Throws(IllegalStateException::class)
+  public fun ParserRuleContext.lastChildOrThrow(): ParserRuleContext {
+    val child = getChild(childCount - 1)
+    return child as? ParserRuleContext
+      ?: error("Expected the last child of $this to be a ParserRuleContext. Was ${child.javaClass.simpleName}.")
+  }
+
   /**
    * Returns the literal text this [ctx] refers to, iff it is a [LineStringLiteralContext]
    * (potentially via many intermediate parser rules).

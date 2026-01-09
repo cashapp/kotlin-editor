@@ -52,4 +52,17 @@ internal object BuildScripts {
       
       val foo = 1
     """.trimIndent()
+
+  val hasViolations3 = """
+      apply(plugin = "foo")
+      
+      val bar = 1
+      
+      @CacheableTask
+      public class MyTask : DefaultTask() {
+        @TaskAction fun action() {
+          println("Ohnoes")
+        }
+      }
+    """.trimIndent()
 }

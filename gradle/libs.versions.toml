@@ -3,6 +3,8 @@ antlr = "4.13.2"
 dependencyAnalysis = "3.5.1"
 # Keep this version in sync with settings script
 develocity = "4.3"
+jackson = "2.20.1"
+jacksonAnnotations = "2.20"
 java = "11"
 junit-jupiter = "5.14.1"
 junit-launcher = "1.14.1"
@@ -18,6 +20,11 @@ antlr-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
 assertj = "org.assertj:assertj-core:3.27.2"
 dependencyAnalysisPlugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependencyAnalysis" }
 develocityPlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref = "develocity" }
+jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
 # junit-jupiter-api and junit-jupiter-engine are referenced from build-logic
 # note that the junit-jupiter-engine dependency depends on junit-bom
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }

@@ -1,5 +1,6 @@
 package cash.recipes.lint.buildscripts
 
+import cash.recipes.lint.buildscripts.model.Position
 import cash.recipes.lint.buildscripts.model.Statement
 import cash.recipes.lint.buildscripts.utils.BuildScripts
 import cash.recipes.lint.buildscripts.utils.withContent
@@ -76,6 +77,8 @@ internal class LinterTest {
             // Any statement anywhere matching this spec is also allow-listed.
             || stmt.text in allowedNames
       }
+
+      override fun test(path: Path): Boolean = path.startsWith(Path.of("a"))
     }
     val allowList = AllowList.of(spec)
     val linter = Linter.of(allowList, tempDir)
@@ -84,14 +87,10 @@ internal class LinterTest {
     val reports = linter.getReports()
 
     // Then
-    assertThat(reports.reports).size().isEqualTo(3)
+    assertThat(reports.reports).size().isEqualTo(2)
 
     with(reports.reports.single { it.buildScript.toString() == "build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("build.gradle.kts")
-      assertThat(statements).isEmpty()
-    }
-    with(reports.reports.single { it.buildScript.toString() == "a/build.gradle.kts" }) {
-      assertThat(buildScript.toString()).isEqualTo("a/build.gradle.kts")
       assertThat(statements).isEmpty()
     }
     with(reports.reports.single { it.buildScript.toString() == "b/c/build.gradle.kts" }) {
@@ -112,6 +111,8 @@ internal class LinterTest {
         // the "a/build.gradle.kts" script is fully allow-listed.
         return buildScript.startsWith(Path.of("a"))
       }
+
+      override fun test(path: Path): Boolean = path.startsWith(Path.of("a"))
     }
     val allowList = AllowList.of(spec)
     val linter = Linter.of(allowList, tempDir)
@@ -120,11 +121,47 @@ internal class LinterTest {
     val reports = linter.getReports()
 
     // Then
-    assertThat(reports.reports).size().isEqualTo(3)
+    assertThat(reports.reports).size().isEqualTo(1)
 
     with(reports.reports.single { it.buildScript.toString() == "build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("build.gradle.kts")
       assertThat(statements.map { it.text }).containsExactly("plugins")
+    }
+  }
+
+  @Test
+  fun `can lint with yaml config file`() {
+    tempDir.resolve("build.gradle.kts").withContent(BuildScripts.noViolations)
+    tempDir.resolve("a/b/build.gradle.kts").withContent(BuildScripts.hasViolations1)
+    tempDir.resolve("a/c/build.gradle.kts").withContent(BuildScripts.hasViolations2)
+    tempDir.resolve("d/build.gradle.kts").withContent(BuildScripts.hasViolations3)
+
+    val yaml = """
+      allowed_blocks:
+        - "plugins"
+        - "dependencies"
+        - "tasks"
+
+      allowed_prefixes:
+        - "tasks."
+
+      ignored_paths:
+        - "d"
+    """.trimIndent()
+
+    val allowList = AllowList.of(yaml)
+    val linter = Linter.of(allowList, tempDir)
+
+    // When
+    val reports = linter.getReports()
+
+    // Then
+    // There are four scripts but one has been ignored.
+    assertThat(reports.reports).size().isEqualTo(3)
+
+    with(reports.reports.single { it.buildScript.toString() == "build.gradle.kts" }) {
+      assertThat(buildScript.toString()).isEqualTo("build.gradle.kts")
+      assertThat(statements).isEmpty()
     }
     with(reports.reports.single { it.buildScript.toString() == "a/b/build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("a/b/build.gradle.kts")
@@ -132,7 +169,9 @@ internal class LinterTest {
     }
     with(reports.reports.single { it.buildScript.toString() == "a/c/build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("a/c/build.gradle.kts")
-      assertThat(statements).isEmpty()
+      assertThat(statements).containsExactly(
+        Statement.Declaration(firstLine = "val foo = 1", start = Position(6, 0), stop = Position(6, 10))
+      )
     }
   }
 }

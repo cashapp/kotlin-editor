@@ -15,14 +15,13 @@ public class Linter private constructor(
   private val path: Path,
 ) {
 
+  // TODO(tsr): entirely skip parsing any script that has been configured to be ignored.
   private val _reports by lazy(LazyThreadSafetyMode.NONE) {
     val statements = getBuildScripts()
+      .filterNot { buildScript -> allowList.isIgnoredBuildScript(relativePath(buildScript)) }
       .map { buildScript ->
-        // We want the path to the build script relative to the root (`path`). In the case where `path` IS the build
-        // script, then the relative path is just the last part of the `path`
-        val relativePath = if (path == buildScript) path.last() else path.relativize(buildScript)
-
         val extractor = BuildscriptTopLevelStatementExtractor.of(buildScript)
+        val relativePath = relativePath(buildScript)
 
         Report(
           relativePath,
@@ -32,6 +31,14 @@ public class Linter private constructor(
       .toList()
 
     ReportCollection(path, statements)
+  }
+
+  /**
+   * We want the path to the build script relative to the root (`path`). In the case where `path` IS the build script,
+   * then the relative path is just the last part of the `path`.
+   */
+  private fun relativePath(buildScript: Path): Path {
+    return if (path == buildScript) path.last() else path.relativize(buildScript)
   }
 
   /** True if there are any violations in any of the parsed build scripts. */

@@ -3,6 +3,7 @@ package cash.recipes.lint.buildscripts.parser
 import cash.grammar.kotlindsl.parse.Parser
 import cash.grammar.kotlindsl.utils.CollectingErrorListener
 import cash.grammar.kotlindsl.utils.Context.fullText
+import cash.grammar.kotlindsl.utils.Context.lastChildOrThrow
 import cash.grammar.kotlindsl.utils.Context.leafRule
 import cash.grammar.kotlindsl.utils.Context.singleChildOrThrow
 import cash.grammar.kotlindsl.utils.Statements
@@ -43,10 +44,20 @@ internal class BuildscriptTopLevelStatementExtractor private constructor(
       return
     }
 
-    // Get the first line of the statement. E.g., "tasks.jar {"
-    val firstLine = leaf.fullText(input)?.substringBefore(System.lineSeparator()) ?: return
+    // The statement can either have a single child or have any number of labels|annotations followed by a statement.
+    val stmt = if (ctx.childCount > 1) {
+      val child = ctx.lastChildOrThrow()
+      child.firstLine()?.let { child.toStatement(it) }
+    } else {
+      leaf.firstLine()?.let { ctx.singleChildOrThrow().toStatement(it) }
+    }
 
-    ctx.singleChildOrThrow().toStatement(firstLine)?.let { statements.add(it) }
+    stmt?.let { statements.add(it) }
+  }
+
+  /** Get the first line of a statement. E.g., "tasks.jar {" */
+  private fun ParserRuleContext.firstLine(): String? {
+    return fullText(input)?.lineSequence()?.firstOrNull { it.isNotBlank() }
   }
 
   override fun exitStatement(ctx: KotlinParser.StatementContext?) {
