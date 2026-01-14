@@ -1,21 +1,5 @@
 package cash.recipes.lint.buildscripts.model
 
-import java.nio.file.Path
-
-/**
- * A collection of [reports], each for a single [Report.buildScript]. [root] is at the root of the directory hierarchy
- * that contains each of these build scripts. May be null.
- */
-public data class ReportCollection(public val reports: List<Report>) {
-  public fun hasErrors(): Boolean = reports.any { it.statements.isNotEmpty() }
-}
-
-/** A report of [statements] for a single [buildScript]. */
-public data class Report(
-  public val buildScript: Path,
-  public val statements: List<Statement>,
-)
-
 /**
  * See `KotlinParser.g4` in the `:grammar` project for more information. Essentially, a Gradle Kotlin DSL script may
  * contain any of the following top-level statements (in alphabetical order):

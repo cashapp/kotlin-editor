@@ -20,24 +20,10 @@ public class MachineReadableReporter private constructor(
   public override fun buildReport(): String {
     val reports = linter.getReports()
 
-    return if (reports.reports.all { it.statements.isEmpty() }) {
-      // The case where there are no violations anywhere
-      "None of the build scripts contain forbidden statements."
-    } else if (reports.reports.size == 1) {
-      // The case where there is only a single file analyzed
-      val report = reports.reports.single()
-
-      if (report.statements.isEmpty()) {
-        "The build script '${report.buildScript}' contains no forbidden statements."
-      } else {
-        buildString { buildReport(report) }
-      }
-    } else {
-      buildString {
-        reports.reports
-          .filter { report -> report.statements.isNotEmpty() }
-          .forEach { report -> buildReport(report) }
-      }
+    return buildString {
+      reports.reports
+        .filter { report -> report.statements.isNotEmpty() }
+        .forEach { report -> buildReport(report) }
     }
   }
 
