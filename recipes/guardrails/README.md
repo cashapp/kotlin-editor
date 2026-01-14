@@ -140,7 +140,8 @@ gradle-guard baseline --config=gradle-guard.yml --baseline=baseline.yml --output
 1. When used with `check`, the functionality combines the two config files (`gradle-guard.yml` and `baseline.yml`) when
    generating reports.
 2. When used with `baseline` _without_ the `--output` option, will generate a new baseline, overwriting the original.
-3. When used with `baseline` _with_ the `--output` option, will generate a new baseline at the specified location.
+3. When used with `baseline` _with_ the `--output` option, will generate a new baseline at the specified location. This
+   new baseline is _not_ incremental. It is suitable as a full replacement for the original baseline.
 
 ## Contributing
 
