@@ -10,8 +10,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.InputStream
+import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.inputStream
+import java.nio.file.StandardOpenOption
 
 /**
  * Populated from `gradle-lint.yml`. An example file might look like this:
@@ -80,7 +81,15 @@ public data class LintConfig(
   }
 
   internal companion object {
-    fun parse(yaml: Path): LintConfig = parse(yaml.inputStream())
+    fun parse(yaml: Path): LintConfig {
+      return try {
+        parse(Files.newInputStream(yaml, StandardOpenOption.READ))
+      } catch (e: Exception) {
+        // TODO(tsr): use proper logger?
+        System.err.println("Error processing gradle guard config file. Expected a YAML file. Was '$yaml'.")
+        throw e
+      }
+    }
 
     fun parse(yaml: InputStream): LintConfig {
       val mapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule.Builder().build())

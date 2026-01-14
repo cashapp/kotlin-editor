@@ -4,7 +4,6 @@ import cash.recipes.lint.buildscripts.model.Statement
 import java.nio.file.Path
 import java.util.function.BiPredicate
 import kotlin.io.path.exists
-import kotlin.io.path.extension
 
 /**
  * Any statement not explicitly allow-listed as treated as a reportable violation. Every permissible statement must
@@ -38,8 +37,6 @@ public class AllowList private constructor(private val specs: List<Spec>) {
   }
 
   public companion object {
-    private val YAML_EXT = listOf("yaml", "yml")
-
     /** Create an [AllowList] from one or more yml config files. See [LintConfig] for an example config file. */
     public fun of(vararg files: Path): AllowList = of(files.toList())
 
@@ -52,7 +49,6 @@ public class AllowList private constructor(private val specs: List<Spec>) {
     private fun validateYaml(files: List<Path>) {
       files.forEach { f ->
         require(f.exists()) { "$f does not exist." }
-        require(f.extension in YAML_EXT) { "Expected a yml file. Was '$f'." }
       }
     }
 

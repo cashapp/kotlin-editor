@@ -1,9 +1,7 @@
 package cash.recipes.lint.buildscripts.config
 
 import cash.recipes.lint.buildscripts.model.Statement
-import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 
 public class YamlSpec(public val lintConfig: LintConfig) : AllowList.Spec {
 
@@ -25,9 +23,6 @@ public class YamlSpec(public val lintConfig: LintConfig) : AllowList.Spec {
   }
 
   internal companion object {
-    fun of(configFile: Path): YamlSpec {
-      val config = LintConfig.parse(Files.newInputStream(configFile, StandardOpenOption.READ))
-      return YamlSpec(config)
-    }
+    fun of(configFile: Path): YamlSpec = YamlSpec(LintConfig.parse(configFile))
   }
 }
