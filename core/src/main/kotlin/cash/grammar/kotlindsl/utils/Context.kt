@@ -47,7 +47,14 @@ public object Context {
     return tree
   }
 
-  // TODO
+  /**
+   * Given a [ParserRuleContext] return its only child (also expected to be a [ParserRuleContext]). Throws an exception
+   * if there are multiple children or the single child is not a [ParserRuleContext] (it might be a
+   * [TerminalNode][org.antlr.v4.runtime.tree.TerminalNode]) instead.
+   *
+   * @see [leafRule]
+   * @see [lastChildOrThrow]
+   */
   @Throws(IllegalStateException::class)
   public fun ParserRuleContext.singleChildOrThrow(): ParserRuleContext {
     if (childCount == 1) {
@@ -59,7 +66,14 @@ public object Context {
     error("Expected $this to have a single child. Had $childCount children.")
   }
 
-  // TODO
+  /**
+   * Given a [ParserRuleContext] return its last child (also expected to be a [ParserRuleContext]). Throws an exception
+   * if the last child is not a [ParserRuleContext] (it might be a
+   * [TerminalNode][org.antlr.v4.runtime.tree.TerminalNode]) instead.
+   *
+   * @see [leafRule]
+   * @see [singleChildOrThrow]
+   */
   @Throws(IllegalStateException::class)
   public fun ParserRuleContext.lastChildOrThrow(): ParserRuleContext {
     val child = getChild(childCount - 1)
