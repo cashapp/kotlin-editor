@@ -3,6 +3,7 @@ package com.squareup.gradle
 import com.squareup.gradle.utils.DependencyCatalog
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.Project
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -46,6 +47,16 @@ internal class BasePlugin(private val project: Project) {
   }
 
   private fun Project.configurePublishing() {
+    // Leads to task named `publishMavenPublicationToLocalRepository` that publishes to `<project-dir>/build/repo/`.
+    extensions.getByType(PublishingExtension::class.java).let { publishing ->
+      publishing.repositories { repos ->
+        repos.maven { repo ->
+          repo.name = "local"
+          repo.url = uri(layout.buildDirectory.dir("repo"))
+        }
+      }
+    }
+
     extensions.getByType(MavenPublishBaseExtension::class.java).run {
       publishToMavenCentral(automaticRelease = true, validateDeployment = false)
       signAllPublications()

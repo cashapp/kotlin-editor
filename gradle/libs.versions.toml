@@ -1,8 +1,11 @@
 [versions]
 antlr = "4.13.2"
+clikt = "5.0.3"
 dependencyAnalysis = "3.5.1"
 # Keep this version in sync with settings script
 develocity = "4.3"
+jackson = "2.20.1"
+jacksonAnnotations = "2.20"
 java = "11"
 junit-jupiter = "5.14.1"
 junit-launcher = "1.14.1"
@@ -10,14 +13,27 @@ junit-launcher = "1.14.1"
 kotlin = "2.1.21"
 mavenPublish = "0.35.0"
 
+# https://gradleup.com/shadow/
+#shadowJar = "8.3.9"
+shadowJar = "9.0.0"
+# Requires Java 17
+#shadowJar = "9.3.1"
+
 [libraries]
 # antlr-core is referenced from build-logic
 antlr-core = { module = "org.antlr:antlr4", version.ref = "antlr" }
 antlr-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }
 # assertj is referenced from build-logic
 assertj = "org.assertj:assertj-core:3.27.2"
+clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
+cliktCore = { module = "com.github.ajalt.clikt:clikt-core", version.ref = "clikt" }
 dependencyAnalysisPlugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependencyAnalysis" }
 develocityPlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref = "develocity" }
+jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jacksonKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
 # junit-jupiter-api and junit-jupiter-engine are referenced from build-logic
 # note that the junit-jupiter-engine dependency depends on junit-bom
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
@@ -28,6 +44,7 @@ kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", ver
 kotlinGradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 mavenPublish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "mavenPublish" }
+shadowJarPlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadowJar" }
 
 [plugins]
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }

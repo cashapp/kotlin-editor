@@ -9,6 +9,10 @@ plugins {
 
 gradlePlugin {
   plugins {
+    create("app") {
+      id = "cash.app"
+      implementationClass = "com.squareup.gradle.AppConventionPlugin"
+    }
     create("lib") {
       id = "cash.lib"
       implementationClass = "com.squareup.gradle.LibraryConventionPlugin"
@@ -36,6 +40,7 @@ dependencies {
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinGradlePluginApi)
   implementation(libs.mavenPublish)
+  implementation(libs.shadowJarPlugin)
 }
 
 val javaTarget = JavaLanguageVersion.of(libs.versions.java.get())
