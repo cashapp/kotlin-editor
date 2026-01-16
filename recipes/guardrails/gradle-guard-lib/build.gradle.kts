@@ -2,8 +2,10 @@ plugins {
   id("cash.lib")
 }
 
-version = "0.1-SNAPSHOT"
-group = "app.cash.gradle-guard"
+kotlinEditor {
+  group("app.cash.gradle-guard")
+  version("0.1-SNAPSHOT")
+}
 
 dependencies {
   api(libs.kotlinStdLib)
