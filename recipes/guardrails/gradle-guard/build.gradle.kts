@@ -2,8 +2,10 @@ plugins {
   id("cash.app")
 }
 
-version = "0.1-SNAPSHOT"
-group = "app.cash.gradle-guard"
+kotlinEditor {
+  group("app.cash.gradle-guard")
+  version("0.1-SNAPSHOT")
+}
 
 application {
   mainClass = "cash.recipes.lint.cli.Main"

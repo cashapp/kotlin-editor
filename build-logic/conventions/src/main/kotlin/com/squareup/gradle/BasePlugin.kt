@@ -1,5 +1,6 @@
 package com.squareup.gradle
 
+import com.squareup.gradle.extension.KotlinEditorExtension
 import com.squareup.gradle.utils.DependencyCatalog
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.Project
@@ -20,7 +21,10 @@ internal class BasePlugin(private val project: Project) {
       apply("com.autonomousapps.dependency-analysis")
     }
 
+    KotlinEditorExtension.of(project)
+
     // See gradle.properties
+    // These values may be overridden in individual projects by configuring the `kotlinEditor` extension.
     group = providers.gradleProperty("GROUP").get()
     version = providers.gradleProperty("VERSION").get()
 
