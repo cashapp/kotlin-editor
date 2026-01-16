@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.19
+* [feat]: added new public methods in `Contexts`, and a new `Statements` helper class.
+
 ## Version 0.18
 * [chore]: update antlr to 4.13.2 (latest).
 
