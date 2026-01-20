@@ -30,8 +30,8 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-#      - name: Validate Gradle Wrapper
-#        uses: gradle/actions/wrapper-validation@v3
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -43,4 +43,4 @@ jobs:
         run: './gradlew buildHealth -s'
 
       - name: Publish artifacts
-        run: './gradlew -p recipes/guardrails publishToMavenCentral -s --no-configuration-cache'
+        run: './gradlew publishToMavenCentral -s --no-configuration-cache'
