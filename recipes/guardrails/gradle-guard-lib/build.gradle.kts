@@ -4,7 +4,7 @@ plugins {
 
 kotlinEditor {
   group("app.cash.gradle-guard")
-  version("0.2-SNAPSHOT")
+  version("0.1")
 }
 
 dependencies {
