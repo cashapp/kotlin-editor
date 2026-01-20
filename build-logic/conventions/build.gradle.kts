@@ -43,7 +43,7 @@ dependencies {
   implementation(libs.shadowJarPlugin)
 }
 
-val javaTarget = JavaLanguageVersion.of(libs.versions.java.get())
+val javaTarget = JavaLanguageVersion.of(libs.versions.javaForBuildLogic.get())
 
 java {
   toolchain {

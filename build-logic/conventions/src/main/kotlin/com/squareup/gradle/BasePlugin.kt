@@ -2,6 +2,7 @@ package com.squareup.gradle
 
 import com.squareup.gradle.extension.KotlinEditorExtension
 import com.squareup.gradle.utils.DependencyCatalog
+import com.vanniktech.maven.publish.DeploymentValidation
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -62,7 +63,7 @@ internal class BasePlugin(private val project: Project) {
     }
 
     extensions.getByType(MavenPublishBaseExtension::class.java).run {
-      publishToMavenCentral(automaticRelease = true, validateDeployment = false)
+      publishToMavenCentral(automaticRelease = true, DeploymentValidation.VALIDATED)
       signAllPublications()
 
       pom { p ->
