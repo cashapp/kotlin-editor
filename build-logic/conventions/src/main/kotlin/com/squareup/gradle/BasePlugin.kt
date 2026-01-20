@@ -27,7 +27,12 @@ internal class BasePlugin(private val project: Project) {
     // See gradle.properties
     // These values may be overridden in individual projects by configuring the `kotlinEditor` extension.
     group = providers.gradleProperty("GROUP").get()
-    version = providers.gradleProperty("VERSION").get()
+    // When publishing gradle-guard, we need non-snapshot versions of its dependencies. So, the GHA workflow named
+    // `publish-gradle-guard` has a required input `core_libs_version` that will override the current (probably
+    // "development" or snapshot) of those core libs.
+    version = providers.gradleProperty("cashapp.core-libs-version")
+      .orElse(providers.gradleProperty("VERSION"))
+      .get()
 
     configureJvmTarget()
     configurePublishing()

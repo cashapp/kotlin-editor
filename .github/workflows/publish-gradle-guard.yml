@@ -1,0 +1,51 @@
+name: publish-gradle-guard
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual run'
+        required: false
+      # See BasePlugin.kt
+      core_libs_version:
+        description: 'Non-snapshot version of core libs to use.'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    env:
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
+    runs-on: ubuntu-latest
+    if: github.repository == 'cashapp/kotlin-editor' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Setup java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Execute check
+        run: './gradlew check -s'
+
+      - name: Execute buildHealth
+        run: './gradlew buildHealth -s'
+
+      # See BasePlugin.kt for usage of `-Pcashapp.core-libs-version`
+      - name: Publish artifacts
+        run: './gradlew -p recipes/guardrails/ publishToMavenCentral -Pcashapp.core-libs-version=${{ github.event.inputs.core_libs_version }} -s --no-configuration-cache'
