@@ -3,7 +3,7 @@ name: release-gradle-guard
 on:
   push:
     tags:
-      - 'gradle-guard-v[0-9.]+'
+      - 'gradle-guard-v*'
 
 permissions:
   contents: write
