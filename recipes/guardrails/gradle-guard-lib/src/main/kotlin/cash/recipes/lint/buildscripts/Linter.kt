@@ -5,9 +5,15 @@ import cash.recipes.lint.buildscripts.config.LintConfig
 import cash.recipes.lint.buildscripts.model.Report
 import cash.recipes.lint.buildscripts.model.ReportCollection
 import cash.recipes.lint.buildscripts.parser.BuildscriptTopLevelStatementExtractor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import kotlin.io.path.PathWalkOption
 import kotlin.io.path.exists
 import kotlin.io.path.fileSize
 import kotlin.io.path.isDirectory
@@ -28,20 +34,31 @@ public class Linter private constructor(
   private val root: Path? = null,
 ) {
 
-  private val _reports by lazy(LazyThreadSafetyMode.NONE) {
-    val statements = getBuildScripts()
-      .filterNot { (_, relativePath) -> allowList.isIgnoredBuildScript(relativePath) }
-      .map { (buildScript, relativePath) ->
-        val extractor = BuildscriptTopLevelStatementExtractor.of(buildScript)
-
-        Report(
-          relativePath,
-          allowList.forbiddenStatements(relativePath, extractor.getStatements()),
-        )
+  // Making this function use coroutines makes it about 2x faster when checking a very large (2k+ module) repo.
+  private val _reports: ReportCollection by lazy(LazyThreadSafetyMode.NONE) {
+    runBlocking {
+      val statements: List<Report> = withContext(Dispatchers.IO) {
+        getBuildScripts()
+          .filterNot { (_, relativePath) -> allowList.isIgnoredBuildScript(relativePath) }
+          .map { (buildScript, relativePath) ->
+            // Parsing the scripts is very slow.
+            relativePath to async { BuildscriptTopLevelStatementExtractor.of(buildScript) }
+          }
+          .map { (relativePath, extractor) ->
+            async {
+              Report(
+                relativePath,
+                allowList.forbiddenStatements(relativePath, extractor.await().getStatements()),
+              )
+            }
+          }
+          .toList()
+          .awaitAll()
+          .sortedWith(Report.PATH_COMPARATOR)
       }
-      .toList()
 
-    ReportCollection(statements)
+      ReportCollection(statements)
+    }
   }
 
   /** Returns a list of reports, one for each build script parsed. */
@@ -99,7 +116,8 @@ public class Linter private constructor(
         require(path.exists()) { "$path does not exist!" }
 
         if (path.isDirectory()) {
-          path.walk()
+          // It seems like it should be possible to make this faster.
+          path.walk(PathWalkOption.BREADTH_FIRST)
             .filter { p -> p.isRegularFile() }
             .filter { p -> p.exists() }
             .filter { p -> p.isKotlinDsl() }

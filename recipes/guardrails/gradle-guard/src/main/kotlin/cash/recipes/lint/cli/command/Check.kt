@@ -1,8 +1,9 @@
 package cash.recipes.lint.cli.command
 
 import cash.recipes.lint.buildscripts.reporter.HumanReadableReporter
+import cash.recipes.lint.buildscripts.reporter.Logger
 import cash.recipes.lint.buildscripts.reporter.MachineReadableReporter
-import cash.recipes.lint.cli.Logger
+import cash.recipes.lint.cli.ConsoleLogger
 import cash.recipes.lint.cli.ProcessResult
 import cash.recipes.lint.cli.ProcessResult.Companion.handleResult
 import cash.recipes.lint.cli.command.Check.Format
@@ -31,6 +32,7 @@ internal class Check : BaseGuardCommand(name = "check") {
   override fun run() {
     runCatching {
       Checker(
+        logger = ConsoleLogger(this),
         format = format,
         root = root,
         paths = paths,
@@ -44,11 +46,13 @@ internal class Check : BaseGuardCommand(name = "check") {
 // TODO(tsr): consider passing in a `FileSystem` instance and using that to create Paths instead of `Path.of()`
 internal class Checker(
   private val format: Format,
+  logger: Logger,
   root: String?,
   paths: Set<String>,
   config: String?,
   baseline: String?,
 ) : LinterAction(
+  logger = logger,
   root = root,
   paths = paths,
   config = config,
@@ -56,9 +60,7 @@ internal class Checker(
 ) {
 
   override fun call(): ProcessResult {
-    // TODO(tsr): more advanced logging?
     // Build report
-    val logger = Logger()
     val reporter = when (format) {
       Format.HUMAN -> HumanReadableReporter.of(linter, logger)
       Format.COMPUTER, Format.MACHINE -> MachineReadableReporter.of(linter, logger)

@@ -8,7 +8,7 @@ public data class BaselineConfig(
 ) {
 
   internal companion object {
-    internal val PATH_COMPARATOR = Comparator<BaselineConfig> { left, right ->
+    val PATH_COMPARATOR = Comparator<BaselineConfig> { left, right ->
       left.path.compareTo(right.path)
     }
   }
