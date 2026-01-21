@@ -20,8 +20,6 @@ jobs:
         run: |
           VERSION=$(echo "${{ github.ref_name }}" | sed -e "s/^gradle-guard-v//")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-jobs:
   publish:
     needs: release_version
     runs-on: ubuntu-latest
