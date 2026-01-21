@@ -1,0 +1,64 @@
+name: release-gradle-guard
+
+on:
+  push:
+    tags:
+      - 'gradle-guard-v[0-9.]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release_version:
+    runs-on: ubuntu-latest
+    if: github.repository == 'cashapp/kotlin-editor'
+    outputs:
+      version: ${{ steps.release_version.outputs.version }}
+    steps:
+      - name: Compute release version from tag
+        id: release_version
+        run: |
+          VERSION=$(echo "${{ github.ref_name }}" | sed -e "s/^gradle-guard-v//")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+jobs:
+  publish:
+    needs: release_version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Setup java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Prepare zip for Github Release
+        run: './gradlew -p recipes/guardrails/gradle-guard distZip -Pcashapp.gradle-guard-version=${{ needs.release_version.outputs.version }} -s'
+
+      - name: Extract gradle-guard release notes
+        id: release_notes
+        uses: ffurrer2/extract-release-notes@202313ec7461b6b9e401996714484690ab1ae105 # v3
+        with:
+          changelog_file: recipes/guardrails/CHANGELOG.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        with:
+          tag_name: gradle-guard-v${{ needs.release_version.outputs.version }}
+          name: gradle-guard-v${{ needs.release_version.outputs.version }}
+          body: |
+            ${{ steps.release_notes.outputs.release_notes }}
+          draft: false
+          prerelease: false
+          files: |
+            recipes/guardrails/gradle-guard/build/distributions/gradle-guard-${{ needs.release_version.outputs.version }}.zip
