@@ -1,5 +1,7 @@
 package cash.recipes.lint.cli.command
 
+import cash.recipes.lint.buildscripts.reporter.Logger
+import cash.recipes.lint.cli.ConsoleLogger
 import cash.recipes.lint.cli.ProcessResult
 import cash.recipes.lint.cli.ProcessResult.Companion.handleResult
 import com.github.ajalt.clikt.parameters.options.help
@@ -19,6 +21,7 @@ internal class Baseline : BaseGuardCommand(name = "baseline") {
   override fun run() {
     runCatching {
       Baseliner(
+        logger = ConsoleLogger(this),
         root = root,
         paths = paths,
         config = config,
@@ -30,12 +33,14 @@ internal class Baseline : BaseGuardCommand(name = "baseline") {
 }
 
 internal class Baseliner(
+  logger: Logger,
   root: String?,
   paths: Set<String>,
   config: String?,
   private val baseline: String?,
   private val output: String?,
 ) : LinterAction(
+  logger = logger,
   root = root,
   paths = paths,
   config = config,

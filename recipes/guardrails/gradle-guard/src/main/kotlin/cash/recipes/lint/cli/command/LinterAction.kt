@@ -2,11 +2,13 @@ package cash.recipes.lint.cli.command
 
 import cash.recipes.lint.buildscripts.Linter
 import cash.recipes.lint.buildscripts.config.AllowList
+import cash.recipes.lint.buildscripts.reporter.Logger
 import cash.recipes.lint.cli.ProcessResult
 import java.nio.file.Path
 import java.util.concurrent.Callable
 
 internal abstract class LinterAction(
+  protected val logger: Logger,
   private val root: String?,
   private val paths: Set<String>,
   private val config: String?,

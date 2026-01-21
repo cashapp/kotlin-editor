@@ -19,4 +19,5 @@ dependencies {
   implementation(libs.jacksonDatabind)
   implementation(libs.jacksonDataformatYaml)
   implementation(libs.jacksonKotlin)
+  implementation(libs.kotlinxCoroutinesCore)
 }
