@@ -12,9 +12,9 @@ public class MachineReadableReporter private constructor(
   /**
    * Reports will look like this:
    * ```
-   * grammar/build.gradle.kts:5 has forbidden statement plugins { ... }
-   * core/build.gradle.kts:1 has forbidden statement plugins { ... }
-   * core/build.gradle.kts:5 has forbidden statement tasks.named { ...
+   * grammar/build.gradle.kts:5 has forbidden block plugins { ... }
+   * core/build.gradle.kts:1 has forbidden block plugins { ... }
+   * core/build.gradle.kts:5 has forbidden expression tasks.named { ...
    * ```
    */
   public override fun buildReport(): String {
@@ -34,7 +34,7 @@ public class MachineReadableReporter private constructor(
 
   private fun StringBuilder.buildReport(report: Report) {
     report.statements.forEach { stmt ->
-      appendLine("${report.buildScript}:${stmt.start.line} has forbidden statement ${stmt.richText()}")
+      appendLine("${report.buildScript}:${stmt.start.line} has forbidden ${stmt.printableName} ${stmt.richText()}")
     }
   }
 

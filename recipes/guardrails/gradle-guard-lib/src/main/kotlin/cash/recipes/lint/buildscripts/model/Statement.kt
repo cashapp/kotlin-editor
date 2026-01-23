@@ -25,35 +25,47 @@ public sealed class Statement(
   public open val stop: Position,
 ) {
 
+  public abstract val printableName: String
+
   public data class NamedBlock(
     public val name: String,
     public override val start: Position,
     public override val stop: Position,
-  ) : Statement(name, start, stop)
+  ) : Statement(name, start, stop) {
+    override val printableName: String = "block"
+  }
 
   public data class Assignment(
     public val firstLine: String,
     public override val start: Position,
     public override val stop: Position,
-  ) : Statement(firstLine, start, stop)
+  ) : Statement(firstLine, start, stop) {
+    override val printableName: String = "assignment"
+  }
 
   public data class Declaration(
     public val firstLine: String,
     public override val start: Position,
     public override val stop: Position,
-  ) : Statement(firstLine, start, stop)
+  ) : Statement(firstLine, start, stop) {
+    override val printableName: String = "declaration"
+  }
 
   public data class Expression(
     public val firstLine: String,
     public override val start: Position,
     public override val stop: Position,
-  ) : Statement(firstLine, start, stop)
+  ) : Statement(firstLine, start, stop) {
+    override val printableName: String = "expression"
+  }
 
   public data class Loop(
     public val firstLine: String,
     public override val start: Position,
     public override val stop: Position,
-  ) : Statement(firstLine, start, stop)
+  ) : Statement(firstLine, start, stop) {
+    override val printableName: String = "loop"
+  }
 }
 
 public data class Position(

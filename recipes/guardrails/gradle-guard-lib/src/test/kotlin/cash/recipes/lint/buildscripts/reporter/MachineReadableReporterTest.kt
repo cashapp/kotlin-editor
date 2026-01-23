@@ -48,8 +48,8 @@ internal class MachineReadableReporterTest {
     // Then
     assertThat(logger.getMessages()).containsExactly(
       """
-        |build.gradle.kts:24 has forbidden statement tasks { … }
-        |build.gradle.kts:30 has forbidden statement tasks.jar { …
+        |build.gradle.kts:24 has forbidden block tasks { … }
+        |build.gradle.kts:30 has forbidden expression tasks.jar { …
         |
       """.trimMargin()
     )
@@ -74,9 +74,9 @@ internal class MachineReadableReporterTest {
     assertThat(messages).size().isEqualTo(1)
     assertThat(messages.single()).isEqualTo(
       """
-        |a/build.gradle.kts:24 has forbidden statement tasks { … }
-        |a/build.gradle.kts:30 has forbidden statement tasks.jar { …
-        |b/c/build.gradle.kts:6 has forbidden statement val foo = 1 …
+        |a/build.gradle.kts:24 has forbidden block tasks { … }
+        |a/build.gradle.kts:30 has forbidden expression tasks.jar { …
+        |b/c/build.gradle.kts:6 has forbidden declaration val foo = 1 …
         |
       """.trimMargin()
     )
