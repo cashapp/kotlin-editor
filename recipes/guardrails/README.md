@@ -88,9 +88,9 @@ gradle-guard check --config=gradle-guard.yml --format=machine .
 That output might look like this, for the same input as above:
 
 ```shell
-foo/bar/build.gradle.kts:10 has forbidden statement gradlePlugin { … }
-foo/bar/build.gradle.kts:31 has forbidden statement kotlin { … }
-foo/bar/build.gradle.kts:46 has forbidden statement val javaTarget = JavaLanguageVersion.of(libs.versions.java.get()) …
+foo/bar/build.gradle.kts:10 has forbidden block gradlePlugin { … }
+foo/bar/build.gradle.kts:31 has forbidden block kotlin { … }
+foo/bar/build.gradle.kts:46 has forbidden declaration val javaTarget = JavaLanguageVersion.of(libs.versions.java.get()) …
 ````
 
 > Note. The `--format` option supports three values:
