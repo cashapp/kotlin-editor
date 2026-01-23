@@ -65,4 +65,14 @@ internal object BuildScripts {
         }
       }
     """.trimIndent()
+
+  val baseline = """
+    plugins {
+      id("java")
+    }
+ 
+    val host = System.getenv("OST") ?: "localhost"
+    val port = System.getenv("PORT") ?: "1234"
+
+  """.trimIndent()
 }

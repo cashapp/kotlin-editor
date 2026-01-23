@@ -242,4 +242,46 @@ internal class LinterTest {
       )
     )
   }
+
+  @Test fun `respects the baseline`() {
+    // Given
+    tempDir.resolve("build.gradle.kts").withContent(BuildScripts.baseline)
+
+    val yaml = """
+      allowed_blocks:
+      - plugins
+    """.trimIndent()
+    val configFile = tempDir.resolve("kotlin-dsl-config.yml").withContent(yaml)
+
+    var allowList = AllowList.of(configFile)
+    var linter = Linter.of(allowList, listOf(tempDir))
+
+    // Expect the check to fail
+    assertThat(linter.hasErrors()).isTrue()
+
+    // When we write the baseline
+    val baseline = tempDir.resolve("baseline.yml")
+    linter.writeBaseline(baseline)
+
+    // Then the baseline has the expected contents
+    assertThat(baseline).content().isEqualTo(
+      """
+        |allowed_blocks:
+        |- "plugins"
+        |baseline:
+        |- path: "build.gradle.kts"
+        |  allowed_prefixes:
+        |  - "val host = System.getenv(\"OST\") ?: \"localhost\""
+        |  - "val port = System.getenv(\"PORT\") ?: \"1234\""
+        |
+      """.trimMargin()
+    )
+
+    // When we use the new baseline
+    allowList = AllowList.of(configFile, baseline)
+    linter = Linter.of(allowList = allowList, paths = listOf(tempDir))
+
+    // Then the check passes
+    assertThat(linter.hasErrors()).isFalse()
+  }
 }
