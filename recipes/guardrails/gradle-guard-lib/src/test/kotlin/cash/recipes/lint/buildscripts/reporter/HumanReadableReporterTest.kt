@@ -30,7 +30,7 @@ internal class HumanReadableReporterTest {
     // Then
     val messages = logger.getMessages()
     assertThat(messages).size().isEqualTo(1)
-    assertThat(messages.single()).isEqualTo("None of the build scripts contain forbidden statements.")
+    assertThat(messages.single().trim()).isEqualTo("None of the build scripts contain forbidden statements.")
   }
 
   @Test

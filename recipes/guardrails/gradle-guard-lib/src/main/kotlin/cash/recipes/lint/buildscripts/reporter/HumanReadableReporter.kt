@@ -38,7 +38,7 @@ public class HumanReadableReporter private constructor(
 
     return if (reports.reports.all { it.statements.isEmpty() }) {
       // The case where there are no violations anywhere
-      "None of the build scripts contain forbidden statements."
+      "None of the build scripts contain forbidden statements.\n"
     } else if (reports.reports.size == 1) {
       // The case where there is only a single file analyzed
       val report = reports.reports.single()
