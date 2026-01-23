@@ -27,12 +27,13 @@ public class Comments(
 
   public fun getCommentsToLeft(before: Token): String? {
     var index = before.tokenIndex - 1
-    if (index <= 0) return null
+    if (index < 0) return null
 
     var next = tokens.get(index)
 
     while (next != null && next.isWhitespace()) {
-      next = tokens.get(--index)
+      if (--index < 0) break
+      next = tokens.get(index)
     }
 
     if (next == null) return null
@@ -46,7 +47,8 @@ public class Comments(
         break
       }
 
-      next = tokens.get(--index)
+      if (--index < 0) break
+      next = tokens.get(index)
     }
 
     if (comments.isEmpty()) return null

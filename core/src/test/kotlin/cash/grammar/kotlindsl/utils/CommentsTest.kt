@@ -85,4 +85,54 @@ internal class CommentsTest {
     )
     assertThat(scriptListener.commentTokens["emptyBlock"]?.map { it.text }).isEmpty()
   }
+
+  @Test fun `handles dependencies at start of file without comments`() {
+    val buildScript = "dependencies { implementation(libs.lib) }"
+
+    val scriptListener = Parser(
+      file = buildScript,
+      errorListener = TestErrorListener {
+        throw RuntimeException("Syntax error: ${it?.message}", it)
+      },
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
+    ).listener()
+
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "implementation",
+        identifier = "libs.lib".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.MODULE,
+        fullText = "implementation(libs.lib)",
+        precedingComment = null,
+      ),
+    )
+  }
+
+  @Test fun `handles comment at start of file`() {
+    val buildScript =
+      """
+        // Comment at start
+        dependencies { implementation(libs.lib) }
+      """.trimIndent()
+
+    val scriptListener = Parser(
+      file = buildScript,
+      errorListener = TestErrorListener {
+        throw RuntimeException("Syntax error: ${it?.message}", it)
+      },
+      listenerFactory = { input, tokens, _ -> TestListener(input, tokens) }
+    ).listener()
+
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "implementation",
+        identifier = "libs.lib".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.MODULE,
+        fullText = "implementation(libs.lib)",
+        precedingComment = null,
+      ),
+    )
+  }
 }
