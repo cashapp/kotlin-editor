@@ -4,7 +4,7 @@ plugins {
 
 kotlinEditor {
   group("app.cash.gradle-guard")
-  version(providers.gradleProperty("cashapp.gradle-guard-version").orElse("0.2.1-SNAPSHOT").get())
+  version(providers.gradleProperty("cashapp.gradle-guard-version").orElse("0.2.1").get())
 }
 
 dependencies {

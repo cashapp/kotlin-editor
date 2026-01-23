@@ -1,5 +1,8 @@
 # Gradle Guard
 
+## Version 0.2.1
+* [fix]: respect the generated baseline.
+
 ## Version 0.2.0
 * [feat]: parallelize report generation with coroutines.
 
