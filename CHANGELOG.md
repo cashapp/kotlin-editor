@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.20
+* [fix]: handle no-arg project dependency declarations (i.e., `project()`).
+
 ## Version 0.19
 * [feat]: added new public methods in `Contexts`, and a new `Statements` helper class.
 
