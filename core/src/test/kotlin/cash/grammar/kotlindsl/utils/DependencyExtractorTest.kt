@@ -32,7 +32,8 @@ internal class DependencyExtractorTest {
     assertThat(scriptListener.dependencyDeclarationsStatements).containsExactly(testCase.fullText)
   }
 
-  @Test fun `a complex script can be fully parsed`() {
+  @Test
+  fun `a complex script can be fully parsed`() {
     // Given
     val buildScript = """
       dependencies {
@@ -78,7 +79,8 @@ internal class DependencyExtractorTest {
     )
   }
 
-  @Test fun `can parse complex declarations`() {
+  @Test
+  fun `can parse complex declarations`() {
     // Given
     val buildScript = """
       dependencies {
@@ -123,6 +125,36 @@ internal class DependencyExtractorTest {
     )
   }
 
+  @Test
+  fun `can parse a project() dependency`() {
+    // Given
+    val buildScript = """
+      testing.suites {
+        register("compatibilityTest", JvmTestSuite::class) {
+          useJUnitJupiter(libs.versions.junit.jupiter)
+      
+          dependencies {
+            implementation(project())
+          }
+        }
+      }
+    """.trimIndent()
+
+    // When
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "implementation",
+        identifier = "project()".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.PROJECT,
+        fullText = "implementation(project())",
+      )
+    )
+  }
+
   private fun listenerFor(buildScript: String): TestListener {
     return Parser(
       file = buildScript,
@@ -134,7 +166,8 @@ internal class DependencyExtractorTest {
   }
 
   private companion object {
-    @JvmStatic fun declarations(): List<TestCase> = listOf(
+    @JvmStatic
+    fun declarations(): List<TestCase> = listOf(
       TestCase(
         displayName = "raw string coordinates",
         fullText = "api(\"g:a:v\")",

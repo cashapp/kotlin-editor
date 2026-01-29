@@ -379,6 +379,16 @@ public class DependencyExtractor(
       .valueArguments()
       .valueArgument()
 
+    // A declaration like `project()` (meaning _this_ project, the main source).
+    if (args.isEmpty()) {
+      return if (text == "project()") {
+        text.asSimpleIdentifier()
+      } else {
+        // Unclear what this is
+        error("Unknown type of dependency declaration. Text = `${fullText(input)}`")
+      }
+    }
+
     // 1. possibly a simple identifier, like `g:a:v`, or
     // 2. `path = "foo"`
     if (args.size == 1) {
@@ -402,7 +412,7 @@ public class DependencyExtractor(
     }
 
     // Unclear what this would be, bail
-    if (args.size > 2) {
+    if (args.size != 2) {
       return null
     }
 
