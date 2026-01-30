@@ -69,14 +69,14 @@ public data class LintConfig(
 
   public fun getIgnoredPaths(): Set<String> = ignoredPaths?.toSortedSet().orEmpty()
 
-  public fun getBaseline(): Set<BaselineConfig> = baseline?.toSortedSet(BaselineConfig.PATH_COMPARATOR).orEmpty()
+  public fun getBaseline(): Set<BaselineConfig> = baseline?.toSortedSet().orEmpty()
 
   internal fun merge(other: LintConfig): LintConfig {
     return LintConfig(
       allowedBlocks = (getAllowedBlocks() + other.getAllowedBlocks()).toSortedSet(),
       allowedPrefixes = (getAllowedPrefixes() + other.getAllowedPrefixes()).toSortedSet(),
       ignoredPaths = (getIgnoredPaths() + other.getIgnoredPaths()).toSortedSet(),
-      baseline = (getBaseline() + other.getBaseline()),
+      baseline = (getBaseline() + other.getBaseline()).toSortedSet(),
     )
   }
 
@@ -128,7 +128,7 @@ public data class LintConfig(
             )
           }
         }
-        .toSortedSet(BaselineConfig.PATH_COMPARATOR)
+        .toSortedSet()
 
       return LintConfig(baseline = baseline)
     }
