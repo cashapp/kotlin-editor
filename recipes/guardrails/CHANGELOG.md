@@ -1,5 +1,8 @@
 # Gradle Guard
 
+## Version 0.3.0
+* [feat]: `BaselineConfig` is now fully `Comparable`.
+
 ## Version 0.2.1
 * [fix]: respect the generated baseline.
 
