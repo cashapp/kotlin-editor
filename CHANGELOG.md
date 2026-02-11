@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.21
+* [fix]: `IndexOutOfBoundsException` in `Comments.getCommentsToLeft`.
+
 ## Version 0.20
 * [fix]: handle no-arg project dependency declarations (i.e., `project()`).
 
