@@ -76,7 +76,8 @@ public data class LintConfig(
       allowedBlocks = (getAllowedBlocks() + other.getAllowedBlocks()).toSortedSet(),
       allowedPrefixes = (getAllowedPrefixes() + other.getAllowedPrefixes()).toSortedSet(),
       ignoredPaths = (getIgnoredPaths() + other.getIgnoredPaths()).toSortedSet(),
-      baseline = (getBaseline() + other.getBaseline()).toSortedSet(),
+      // BaselineConfig is a complex object, so we can't just add two sets together naively
+      baseline = BaselineConfig.merge(getBaseline(), other.getBaseline()).toSortedSet(),
     )
   }
 

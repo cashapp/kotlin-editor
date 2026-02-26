@@ -21,4 +21,24 @@ public data class BaselineConfig(
   public fun getAllowedBlocks(): Set<String> = allowedBlocks.orEmpty().toSortedSet()
 
   public fun getAllowedPrefixes(): Set<String> = allowedPrefixes.orEmpty().toSortedSet()
+
+  public companion object {
+    // When merging two LintConfigs, we need to do a complex merge on the BaselineConfig of each so we don't get
+    // multiple entries for the same project.
+    public fun merge(left: Set<BaselineConfig>, right: Set<BaselineConfig>): Set<BaselineConfig> {
+      val map = mutableMapOf<String, BaselineConfig>()
+      map.putAll(left.associateBy { it.path })
+      right.forEach { config ->
+        map.merge(config.path, config) { acc, inc ->
+          BaselineConfig(
+            path = acc.path,
+            allowedBlocks = (acc.getAllowedBlocks() + inc.getAllowedBlocks()).toSortedSet(),
+            allowedPrefixes = (acc.getAllowedPrefixes() + inc.getAllowedPrefixes()).toSortedSet(),
+          )
+        }
+      }
+
+      return map.values.toSortedSet()
+    }
+  }
 }
