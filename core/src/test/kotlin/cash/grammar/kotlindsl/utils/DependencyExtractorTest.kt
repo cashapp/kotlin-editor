@@ -284,6 +284,14 @@ internal class DependencyExtractorTest {
         capability = Capability.DEFAULT,
         type = Type.GRADLE_DISTRIBUTION,
       ),
+      TestCase(
+        displayName = "version-catalog-workaround",
+        fullText = "implementation(files(libs::class.java.superclass.protectionDomain.codeSource.location))",
+        configuration = "implementation",
+        identifier = "libs::class.java.superclass.protectionDomain.codeSource.location",
+        capability = Capability.DEFAULT,
+        type = Type.FILES,
+      ),
     )
   }
 
