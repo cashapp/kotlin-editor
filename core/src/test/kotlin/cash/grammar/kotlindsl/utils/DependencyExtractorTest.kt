@@ -155,6 +155,49 @@ internal class DependencyExtractorTest {
     )
   }
 
+  // project.sourcesets["test"].output is a `FileCollection`. It's also a `PostfixUnaryExpression` that has three
+  // `PostfixUnarySuffix`es after its `PrimaryExpression`.
+  // https://github.com/square/gradle-dependencies-sorter/issues/148
+  @Test
+  fun `can parse a a sourceSet output`() {
+    // Given
+    val buildScript = """
+        testing {
+          suites {
+            val testReceiveSpansDisabled by registering(JvmTestSuite::class) {
+              dependencies {
+                implementation(project(":instrumentation:spring:spring-jms:spring-jms-2.0:testing"))
+                // has three PostfixUnarySuffixes
+                implementation(project.sourceSets["test"].output)
+              }
+            }
+          }
+        }
+    """.trimIndent()
+
+    // When
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "implementation",
+        identifier = "\":instrumentation:spring:spring-jms:spring-jms-2.0:testing\"".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.PROJECT,
+        fullText = "implementation(project(\":instrumentation:spring:spring-jms:spring-jms-2.0:testing\"))",
+      ),
+      DependencyDeclaration(
+        configuration = "implementation",
+        identifier = "project.sourceSets[\"test\"].output".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.PROJECT,
+        fullText = "implementation(project.sourceSets[\"test\"].output)",
+        precedingComment = "// has three PostfixUnarySuffixes",
+      ),
+    )
+  }
+
   private fun listenerFor(buildScript: String): TestListener {
     return Parser(
       file = buildScript,

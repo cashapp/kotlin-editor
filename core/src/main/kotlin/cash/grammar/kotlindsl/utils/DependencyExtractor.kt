@@ -374,7 +374,16 @@ public class DependencyExtractor(
   }
 
   private fun PostfixUnaryExpressionContext.findIdentifier(): Identifier? {
-    val args = postfixUnarySuffix().single()
+    val suffixes = postfixUnarySuffix()
+
+    // https://github.com/square/gradle-dependencies-sorter/issues/148
+    // E.g., `project.sourceSets["test"].output (size == 3)
+    if (suffixes.size > 1) {
+      // Bail out and treat the whole thing as the "identifier."
+      return text.asSimpleIdentifier()
+    }
+
+    val args = suffixes.single()
       .callSuffix()
       .valueArguments()
       .valueArgument()
