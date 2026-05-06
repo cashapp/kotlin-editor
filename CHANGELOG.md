@@ -1,5 +1,9 @@
 # KotlinEditor
 
+## Version 0.22
+* [fix]: handle dependency declaration on the output of one of a project's sourceSets. E.g., 
+  `project.sourceSets["test"].output`.
+
 ## Version 0.21
 * [fix]: `IndexOutOfBoundsException` in `Comments.getCommentsToLeft`.
 
