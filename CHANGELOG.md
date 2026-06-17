@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.23
+* [feat]: support parsing KMP-style dependencies blocks.
+
 ## Version 0.22
 * [fix]: handle dependency declaration on the output of one of a project's sourceSets. E.g., 
   `project.sourceSets["test"].output`.
