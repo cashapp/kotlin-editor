@@ -79,7 +79,7 @@ internal class BuildscriptTopLevelStatementExtractor private constructor(
 
   private fun KotlinParser.NamedBlockContext.toStatement(): Statement {
     return Statement.NamedBlock(
-      name = name().Identifier().text,
+      name = name().text,
       start = start.toPosition(),
       stop = stop.toPosition(),
     )

@@ -219,7 +219,7 @@ internal class DependencyExtractorTest {
         configuration = "api",
         identifier = "projects.redwoodLayoutWidget".asSimpleIdentifier()!!,
         capability = Capability.DEFAULT,
-        type = Type.MODULE,
+        type = Type.MODULE, // TODO(tsr): this should be `Type.PROJECT`
         fullText = "api(projects.redwoodLayoutWidget)",
       ),
     )

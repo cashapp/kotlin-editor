@@ -66,7 +66,7 @@ public class CommentsInBlockRemover private constructor(
   }
 
   override fun exitNamedBlock(ctx: KotlinParser.NamedBlockContext) {
-    if (ctx.name().last().text == blockName) {
+    if (ctx.name().text == blockName) {
       // Delete inline comments (a comment after a statement)
       val allInlineComments = mutableListOf<Token>()
       ctx.statements().statement().forEach {

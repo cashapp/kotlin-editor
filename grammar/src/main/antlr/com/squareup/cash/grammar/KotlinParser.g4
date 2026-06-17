@@ -66,11 +66,12 @@ declaration
 // SECTION: Gradle script blocks
 
 namedBlock
-    : name (NL* DOT name)* LCURL NL* statements NL* RCURL
+    : name LCURL NL* statements NL* RCURL
     ;
 
 name
     : Identifier
+    | Identifier (NL* DOT Identifier)*
     ;
 
 // SECTION: classes

@@ -54,7 +54,7 @@ internal class HumanReadableReporterTest {
         |   Start: (Line: 24, Column: 0)
         |   End:   (Line: 28, Column: 0)
         |
-        |2: tasks.jar { … (expression)
+        |2: tasks.jar { … (named block)
         |   Start: (Line: 30, Column: 0)
         |   End:   (Line: 32, Column: 0)
         |
@@ -96,7 +96,7 @@ internal class HumanReadableReporterTest {
         |   Start: (Line: 24, Column: 0)
         |   End:   (Line: 28, Column: 0)
         |
-        |2: tasks.jar { … (expression)
+        |2: tasks.jar { … (named block)
         |   Start: (Line: 30, Column: 0)
         |   End:   (Line: 32, Column: 0)
         |

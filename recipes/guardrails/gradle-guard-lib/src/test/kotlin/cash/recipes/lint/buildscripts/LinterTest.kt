@@ -30,7 +30,7 @@ internal class LinterTest {
     val forbiddenStatements = linter.getReports().reports.single()
 
     // Then
-    assertThat(forbiddenStatements.statements.map { it.text }).containsExactly("tasks", "tasks.jar {")
+    assertThat(forbiddenStatements.statements.map { it.text }).containsExactly("tasks", "tasks.jar")
     assertThat(forbiddenStatements.buildScript.name).isEqualTo("build.gradle.kts")
   }
 
@@ -56,7 +56,7 @@ internal class LinterTest {
     }
     with(reports.reports.single { it.buildScript.toString() == "a/build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("a/build.gradle.kts")
-      assertThat(statements.map { it.text }).containsExactly("tasks", "tasks.jar {")
+      assertThat(statements.map { it.text }).containsExactly("tasks", "tasks.jar")
     }
     with(reports.reports.single { it.buildScript.toString() == "b/c/build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("b/c/build.gradle.kts")
@@ -169,7 +169,9 @@ internal class LinterTest {
     }
     with(reports.reports.single { it.buildScript.toString() == "a/b/build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("a/b/build.gradle.kts")
-      assertThat(statements).isEmpty()
+      assertThat(statements).containsExactly(
+        Statement.NamedBlock(name = "tasks.jar", start = Position(30, 0), stop = Position(32, 0))
+      )
     }
     with(reports.reports.single { it.buildScript.toString() == "a/c/build.gradle.kts" }) {
       assertThat(buildScript.toString()).isEqualTo("a/c/build.gradle.kts")
@@ -220,6 +222,9 @@ internal class LinterTest {
         |ignored_paths:
         |- "d"
         |baseline:
+        |- path: "a/b/build.gradle.kts"
+        |  allowed_blocks:
+        |  - "tasks.jar"
         |- path: "a/c/build.gradle.kts"
         |  allowed_prefixes:
         |  - "val foo = 1"
@@ -230,14 +235,18 @@ internal class LinterTest {
     // and it can be parsed (validating round-trip)
     assertThat(LintConfig.parse(dest)).isEqualTo(
       LintConfig(
-        allowedBlocks = setOf("dependencies", "plugins", "tasks"),
+        allowedBlocks = setOf("plugins", "tasks", "dependencies"),
         allowedPrefixes = setOf("tasks."),
         ignoredPaths = setOf("d"),
         baseline = setOf(
           BaselineConfig(
+            path = "a/b/build.gradle.kts",
+            allowedBlocks = setOf("tasks.jar"),
+          ),
+          BaselineConfig(
             path = "a/c/build.gradle.kts",
             allowedPrefixes = setOf("val foo = 1"),
-          )
+          ),
         )
       )
     )

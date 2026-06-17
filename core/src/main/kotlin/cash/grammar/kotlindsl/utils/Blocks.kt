@@ -17,16 +17,22 @@ public object Blocks {
   public const val SUBPROJECTS: String = "subprojects"
 
   public val NamedBlockContext.isAllprojects: Boolean
-    get() = name().last().text == ALLPROJECTS
+    get() = name().text == ALLPROJECTS
 
   public val NamedBlockContext.isBuildscript: Boolean
-    get() = name().last().text == BUILDSCRIPT
+    get() = name().text == BUILDSCRIPT
 
   public val NamedBlockContext.isDependencies: Boolean
-    get() = name().last().text == DEPENDENCIES
+    get() {
+      val name = name().text
+      // standard `dependencies {}` block
+      return name == DEPENDENCIES
+      // KMP-style dependencies block, e.g. `sourceSets.commonMain.dependencies {}`
+          || name.endsWith(DEPENDENCIES)
+    }
 
   public val NamedBlockContext.isDependencyResolutionManagement: Boolean
-    get() = name().last().text == DEPENDENCY_RESOLUTION_MANAGEMENT
+    get() = name().text == DEPENDENCY_RESOLUTION_MANAGEMENT
 
   /**
    * Returns true if this is the top-level "plugins" block. False otherwise. In particular, will
@@ -38,13 +44,13 @@ public object Blocks {
    * ```
    */
   public val NamedBlockContext.isPlugins: Boolean
-    get() = name().last().text == PLUGINS && isTopLevel(this)
+    get() = name().text == PLUGINS && isTopLevel(this)
 
   public val NamedBlockContext.isRepositories: Boolean
-    get() = name().last().text == REPOSITORIES
+    get() = name().text == REPOSITORIES
 
   public val NamedBlockContext.isSubprojects: Boolean
-    get() = name().last().text == SUBPROJECTS
+    get() = name().text == SUBPROJECTS
 
   /**
    * Returns the outermost block relative to the current block, represented by the block at the top
@@ -163,7 +169,7 @@ public object Blocks {
     var parent = ctx.parent
     while (parent !is ScriptContext) {
       if (parent is NamedBlockContext) {
-        val parentName = parent.name().last().text
+        val parentName = parent.name().text
         if (name == null || parentName == name) {
           return parentName
         }
@@ -186,7 +192,7 @@ public object Blocks {
     action: (NamedBlockContext) -> Unit
   ) {
     iter.mapNotNull { it.namedBlock() }
-      .filter { name == null || it.name().last().text == name }
+      .filter { name == null || it.name().text == name }
       .forEach { action(it) }
   }
 }

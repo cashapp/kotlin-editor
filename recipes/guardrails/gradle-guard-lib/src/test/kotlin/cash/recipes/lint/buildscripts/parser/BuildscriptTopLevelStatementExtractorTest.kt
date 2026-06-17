@@ -21,10 +21,7 @@ internal class BuildscriptTopLevelStatementExtractorTest {
       Statement.NamedBlock("plugins", Position(1, 0), Position(4, 0)),
       Statement.NamedBlock("dependencies", Position(6, 0), Position(22, 0)),
       Statement.NamedBlock("tasks", Position(24, 0), Position(28, 0)),
-      Statement.Expression(
-        "tasks.jar {",
-        Position(line = 30, positionInLine = 0), stop = Position(line = 32, positionInLine = 0)
-      ),
+      Statement.NamedBlock("tasks.jar", Position(30, 0), Position(32, 0)),
     )
   }
 

@@ -50,7 +50,7 @@ public class DependencyExtractor(
    */
   public fun collectDependencies(ctx: NamedBlockContext): DependencyContainer {
     require(ctx.isDependencies) {
-      "Expected dependencies block. Was '${ctx.name().last().text}'"
+      "Expected dependencies block. Was '${ctx.name().text}'"
     }
 
     val statements = ctx.statements().statement()
