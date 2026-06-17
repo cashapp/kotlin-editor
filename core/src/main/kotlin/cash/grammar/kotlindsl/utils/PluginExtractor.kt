@@ -32,7 +32,7 @@ public object PluginExtractor {
    */
   public fun scriptLikeContext(blockStack: ArrayDeque<NamedBlockContext>): Boolean {
     val isAllprojectsBlock = blockStack.firstOrNull { namedBlock ->
-      namedBlock.name().text in pluginScriptBlocks
+      namedBlock.name().last().text in pluginScriptBlocks
     } != null
 
     return !(blockStack.size > 1 || (blockStack.size == 1 && !isAllprojectsBlock))

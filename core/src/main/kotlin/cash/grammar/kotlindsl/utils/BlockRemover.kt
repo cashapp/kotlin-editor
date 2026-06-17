@@ -40,7 +40,7 @@ public class BlockRemover private constructor(
   override fun exitNamedBlock(ctx: KotlinParser.NamedBlockContext) {
     val simpleBlocks = blocksToRemove.filterIsInstance<RemovableBlock.SimpleBlock>()
 
-    if (ctx.name().text in simpleBlocks.map { it.name }) {
+    if (ctx.name().last().text in simpleBlocks.map { it.name }) {
       // delete whole block and spaces around it
       rewriter.delete(ctx.start, ctx.stop)
       rewriter.deleteWhitespaceToLeft(ctx.start)

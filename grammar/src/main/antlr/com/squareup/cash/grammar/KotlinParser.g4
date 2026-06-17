@@ -66,7 +66,7 @@ declaration
 // SECTION: Gradle script blocks
 
 namedBlock
-    : name LCURL NL* statements NL* RCURL
+    : name (NL* DOT name)* LCURL NL* statements NL* RCURL
     ;
 
 name

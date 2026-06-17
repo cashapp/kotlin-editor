@@ -198,6 +198,33 @@ internal class DependencyExtractorTest {
     )
   }
 
+  // https://github.com/square/gradle-dependencies-sorter/issues/153
+  @Test
+  fun `can parse dependency declarations using dot syntax`() {
+    // Given
+    val buildScript = """
+        kotlin {
+          sourceSets.commonMain.dependencies {
+            api(projects.redwoodLayoutWidget)
+          }
+        }
+    """.trimIndent()
+
+    // When
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "api",
+        identifier = "projects.redwoodLayoutWidget".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.MODULE,
+        fullText = "api(projects.redwoodLayoutWidget)",
+      ),
+    )
+  }
+
   private fun listenerFor(buildScript: String): TestListener {
     return Parser(
       file = buildScript,

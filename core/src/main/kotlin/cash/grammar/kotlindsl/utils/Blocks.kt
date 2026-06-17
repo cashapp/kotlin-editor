@@ -17,16 +17,16 @@ public object Blocks {
   public const val SUBPROJECTS: String = "subprojects"
 
   public val NamedBlockContext.isAllprojects: Boolean
-    get() = name().text == ALLPROJECTS
+    get() = name().last().text == ALLPROJECTS
 
   public val NamedBlockContext.isBuildscript: Boolean
-    get() = name().text == BUILDSCRIPT
+    get() = name().last().text == BUILDSCRIPT
 
   public val NamedBlockContext.isDependencies: Boolean
-    get() = name().text == DEPENDENCIES
+    get() = name().last().text == DEPENDENCIES
 
   public val NamedBlockContext.isDependencyResolutionManagement: Boolean
-    get() = name().text == DEPENDENCY_RESOLUTION_MANAGEMENT
+    get() = name().last().text == DEPENDENCY_RESOLUTION_MANAGEMENT
 
   /**
    * Returns true if this is the top-level "plugins" block. False otherwise. In particular, will
@@ -38,13 +38,13 @@ public object Blocks {
    * ```
    */
   public val NamedBlockContext.isPlugins: Boolean
-    get() = name().text == PLUGINS && isTopLevel(this)
+    get() = name().last().text == PLUGINS && isTopLevel(this)
 
   public val NamedBlockContext.isRepositories: Boolean
-    get() = name().text == REPOSITORIES
+    get() = name().last().text == REPOSITORIES
 
   public val NamedBlockContext.isSubprojects: Boolean
-    get() = name().text == SUBPROJECTS
+    get() = name().last().text == SUBPROJECTS
 
   /**
    * Returns the outermost block relative to the current block, represented by the block at the top
@@ -163,7 +163,7 @@ public object Blocks {
     var parent = ctx.parent
     while (parent !is ScriptContext) {
       if (parent is NamedBlockContext) {
-        val parentName = parent.name().text
+        val parentName = parent.name().last().text
         if (name == null || parentName == name) {
           return parentName
         }
@@ -186,7 +186,7 @@ public object Blocks {
     action: (NamedBlockContext) -> Unit
   ) {
     iter.mapNotNull { it.namedBlock() }
-      .filter { name == null || it.name().text == name }
+      .filter { name == null || it.name().last().text == name }
       .forEach { action(it) }
   }
 }

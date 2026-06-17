@@ -45,6 +45,6 @@ internal class TestListener(
       statements += dependencyContainer.getStatements().map { it.fullText(input)!!.trim() }
     }
 
-    commentTokens[ctx.name().text] = comments.getCommentsInBlock(ctx)
+    commentTokens[ctx.name().last().text] = comments.getCommentsInBlock(ctx)
   }
 }

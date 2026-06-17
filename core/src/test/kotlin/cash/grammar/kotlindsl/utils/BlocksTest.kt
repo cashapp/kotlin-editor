@@ -32,7 +32,7 @@ internal class BlocksTest {
     ).listener()
 
     assertThat(scriptListener.outermostBlock).isNotNull()
-    assertThat(scriptListener.outermostBlock!!.name().text).isEqualTo(Blocks.SUBPROJECTS)
+    assertThat(scriptListener.outermostBlock!!.name().last().text).isEqualTo(Blocks.SUBPROJECTS)
   }
 
   @Test fun `outermost block containing 'repositories' is 'buildscript'`() {
@@ -55,7 +55,7 @@ internal class BlocksTest {
     ).listener()
 
     assertThat(scriptListener.outermostBlock).isNotNull()
-    assertThat(scriptListener.outermostBlock!!.name().text).isEqualTo(Blocks.BUILDSCRIPT)
+    assertThat(scriptListener.outermostBlock!!.name().last().text).isEqualTo(Blocks.BUILDSCRIPT)
   }
 
   @Test fun `can get enclosing blocks`() {
@@ -101,7 +101,7 @@ internal class BlocksTest {
     val blocks = mutableListOf<String>()
     buildScript.process { script ->
       Blocks.forEachNamedBlock(script.statement()) { block ->
-        blocks.add(block.name().text)
+        blocks.add(block.name().last().text)
       }
     }
 
