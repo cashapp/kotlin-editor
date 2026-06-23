@@ -203,7 +203,11 @@ public class DependencyExtractor(
           }
         }
       } else if (args == null) {
-        // We're looking at something like `libs.kotlinGradleBom`
+        if (leaf.primaryExpression().text == "projects") {
+          // We're looking at a type-safe project dependency, like `projects.mymodule`
+          type = DependencyDeclaration.Type.PROJECT
+        }
+        // We're looking at something like `libs.kotlinGradleBom` or `projects.mymodule`
         identifier = leaf.text.asSimpleIdentifier()
       }
     } else if (leaf is SimpleIdentifierContext) {

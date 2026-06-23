@@ -198,9 +198,33 @@ internal class DependencyExtractorTest {
     )
   }
 
-  // https://github.com/square/gradle-dependencies-sorter/issues/153
   @Test
   fun `can parse dependency declarations using dot syntax`() {
+    // Given
+    val buildScript = """
+        dependencies {
+          api(projects.redwoodLayoutWidget)
+        }
+    """.trimIndent()
+
+    // When
+    val scriptListener = listenerFor(buildScript)
+
+    // Then
+    assertThat(scriptListener.dependencyDeclarations).containsExactly(
+      DependencyDeclaration(
+        configuration = "api",
+        identifier = "projects.redwoodLayoutWidget".asSimpleIdentifier()!!,
+        capability = Capability.DEFAULT,
+        type = Type.PROJECT,
+        fullText = "api(projects.redwoodLayoutWidget)",
+      ),
+    )
+  }
+
+  // https://github.com/square/gradle-dependencies-sorter/issues/153
+  @Test
+  fun `can parse multiplatform dependency declarations using dot syntax`() {
     // Given
     val buildScript = """
         kotlin {
@@ -219,7 +243,7 @@ internal class DependencyExtractorTest {
         configuration = "api",
         identifier = "projects.redwoodLayoutWidget".asSimpleIdentifier()!!,
         capability = Capability.DEFAULT,
-        type = Type.MODULE, // TODO(tsr): this should be `Type.PROJECT`
+        type = Type.PROJECT,
         fullText = "api(projects.redwoodLayoutWidget)",
       ),
     )
