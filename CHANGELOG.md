@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.24
+* [fix]: parse type-safe project dependencies as PROJECT type.
+
 ## Version 0.23
 * [feat]: support parsing KMP-style dependencies blocks.
 
