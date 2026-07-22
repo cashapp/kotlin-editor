@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.25
+* [feat]: target Kotlin 2.0 in language/api version for Gradle 8.11 compat.
+
 ## Version 0.24
 * [fix]: parse type-safe project dependencies as PROJECT type.
 
