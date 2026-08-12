@@ -8,9 +8,13 @@ Release procedure for KotlinEditor
 1. Update `README.md` if needed.
 1. Bump version number in `gradle.properties` to next stable version (removing the `-SNAPSHOT` 
    suffix).
-1. `git commit -am "chore: prepare for release x.y." && git push`.
+1. `git checkout -b release`.
+1. `git commit -am "chore: prepare for release x.y."`. 
+1. `git push -u origin release` and merge on success.
 1. Publish to Maven Central by invoking the `publish` action on github.
+1. `git checkout -b post-release`.
 1. `git tag -a vx.y -m "Version x.y."`.
 1. Update version number `gradle.properties` to next snapshot version (x.y-SNAPSHOT).
 1. `git commit -am "chore: prepare next development version."`.
+1. `git push -u origin post-release` and merge on success.
 1. `git push && git push --tags`.
