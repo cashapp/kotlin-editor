@@ -1,5 +1,8 @@
 # KotlinEditor
 
+## Version 0.26
+* [feat]: support parsing multi-dollar string prefixes
+
 ## Version 0.25
 * [feat]: target Kotlin 2.0 in language/api version for Gradle 8.11 compat.
 
