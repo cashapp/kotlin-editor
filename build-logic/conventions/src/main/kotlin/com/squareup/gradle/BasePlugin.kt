@@ -18,9 +18,9 @@ internal class BasePlugin(private val project: Project) {
 
   fun apply(): Unit = project.run {
     pluginManager.run {
-      apply("java-library")
       apply("com.vanniktech.maven.publish")
       apply("com.autonomousapps.dependency-analysis")
+      apply("com.autonomousapps.testkit")
     }
 
     KotlinEditorExtension.of(project)

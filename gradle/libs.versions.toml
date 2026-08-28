@@ -4,24 +4,26 @@ clikt = "5.0.3"
 dependencyAnalysis = "3.5.1"
 # Keep this version in sync with settings script
 develocity = "4.3"
+gradlePublishPlugin = "2.1.1"
 jackson = "2.20.1"
 jacksonAnnotations = "2.20"
 java = "11"
 javaForBuildLogic = "17"
 junit-jupiter = "5.14.1"
 junit-launcher = "1.14.1"
-# 2.1.21, or 2.2.21, or 2.3.0
-kotlin = "2.2.21"
+kotlin = "2.4.0"
 kotlin-coroutines = "1.10.2"
 # Supports Gradle 8.11+
 kotlin-languageVersion = "2.0"
-mavenPublish = "0.36.0"
+mavenPublish = "0.37.0"
 
 # https://gradleup.com/shadow/
 #shadowJar = "8.3.9"
 shadowJar = "9.0.0"
 # Requires Java 17
 #shadowJar = "9.3.1"
+testkit-plugin = "0.20"
+testkit-support = "0.28"
 
 [libraries]
 # antlr-core is referenced from build-logic
@@ -33,6 +35,7 @@ clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 cliktCore = { module = "com.github.ajalt.clikt:clikt-core", version.ref = "clikt" }
 dependencyAnalysisPlugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependencyAnalysis" }
 develocityPlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref = "develocity" }
+gradlePublishPlugin = { module = "com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin", version.ref = "gradlePublishPlugin" }
 jacksonCore = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jacksonDataformatYaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
@@ -51,6 +54,8 @@ kotlinGradlePluginApi = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-ap
 kotlinStdLib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 mavenPublish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "mavenPublish" }
 shadowJarPlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadowJar" }
+testkit = { module = "com.autonomousapps.testkit:com.autonomousapps.testkit.gradle.plugin", version.ref = "testkit-plugin" }
+testkit-support = { module = "com.autonomousapps:gradle-testkit-support", version.ref = "testkit-support" }
 
 [plugins]
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
