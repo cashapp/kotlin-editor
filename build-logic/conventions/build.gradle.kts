@@ -21,6 +21,10 @@ gradlePlugin {
       id = "cash.grammar"
       implementationClass = "com.squareup.gradle.GrammarConventionPlugin"
     }
+    create("plugin") {
+      id = "cash.plugin"
+      implementationClass = "com.squareup.gradle.PluginConventionPlugin"
+    }
     create("settings") {
       id = "cash.settings"
       implementationClass = "com.squareup.gradle.SettingsPlugin"
@@ -37,10 +41,12 @@ dependencies {
 
   implementation(libs.dependencyAnalysisPlugin)
   implementation(libs.develocityPlugin)
+  implementation(libs.gradlePublishPlugin)
   implementation(libs.kotlinGradlePlugin)
   implementation(libs.kotlinGradlePluginApi)
   implementation(libs.mavenPublish)
   implementation(libs.shadowJarPlugin)
+  implementation(libs.testkit)
 }
 
 val javaTarget = JavaLanguageVersion.of(libs.versions.javaForBuildLogic.get())
