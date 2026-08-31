@@ -3,6 +3,8 @@ package com.squareup.gradle
 import com.squareup.gradle.utils.DependencyCatalog
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
+import org.gradle.plugins.signing.Sign
 
 /**
  * ```
@@ -24,14 +26,20 @@ public abstract class PluginConventionPlugin : Plugin<Project> {
 
   private fun Project.configureTestKitSupport() {
     // TODO(tsr): I hate this and want to figure out why this is happening
-    tasks.named { it == "publishTestKitSupportForJavaPublicationToFunctionalTestRepository" }.configureEach { t ->
-      t.dependsOn("signPluginMavenPublication")
-    }
-    tasks.named { it == "publishPluginMavenPublicationToFunctionalTestRepository" }.configureEach { t ->
-      t.dependsOn("signTestKitSupportForJavaPublication")
-    }
-    tasks.named { it == "publishPluginMavenPublicationToMavenCentralRepository" }.configureEach { t ->
-      t.dependsOn("signTestKitSupportForJavaPublication")
+//    tasks.named { it == "publishTestKitSupportForJavaPublicationToFunctionalTestRepository" }.configureEach { t ->
+//      t.dependsOn("signPluginMavenPublication")
+//    }
+//    tasks.named { it == "publishPluginMavenPublicationToFunctionalTestRepository" }.configureEach { t ->
+//      t.dependsOn("signTestKitSupportForJavaPublication")
+//    }
+//    tasks.named { it == "publishPluginMavenPublicationToMavenCentralRepository" }.configureEach { t ->
+//      t.dependsOn("signTestKitSupportForJavaPublication")
+//    }
+//    tasks.named { it == "publishTestKitSupportForJavaPublicationToMavenCentralRepository" }.configureEach { t ->
+//      t.dependsOn("signPluginMavenPublication")
+//    }
+    tasks.withType(AbstractPublishToMaven::class.java).configureEach { t ->
+      t.dependsOn(tasks.withType(Sign::class.java))
     }
 
     val versionCatalog = DependencyCatalog(this).catalog
