@@ -30,6 +30,9 @@ public abstract class PluginConventionPlugin : Plugin<Project> {
     tasks.named { it == "publishPluginMavenPublicationToFunctionalTestRepository" }.configureEach { t ->
       t.dependsOn("signTestKitSupportForJavaPublication")
     }
+    tasks.named { it == "publishPluginMavenPublicationToMavenCentralRepository" }.configureEach { t ->
+      t.dependsOn("signTestKitSupportForJavaPublication")
+    }
 
     val versionCatalog = DependencyCatalog(this).catalog
     dependencies.run {
