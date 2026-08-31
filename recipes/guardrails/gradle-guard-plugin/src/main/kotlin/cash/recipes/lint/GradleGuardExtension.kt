@@ -1,8 +1,10 @@
 package cash.recipes.lint
 
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import java.io.BufferedReader
 import java.io.File
@@ -60,6 +62,11 @@ public abstract class GradleGuardExtension @Inject constructor(project: Project)
         ?: error("Can't find '$VERSION_FILENAME'")
     )
 
+  public fun baselineFile(baselineFile: RegularFile) {
+    this.baselineFile.set(baselineFile)
+    this.baselineFile.disallowChanges()
+  }
+
   public fun baselineFile(baselineFile: File) {
     this.baselineFile.set(baselineFile)
     this.baselineFile.disallowChanges()
@@ -70,6 +77,11 @@ public abstract class GradleGuardExtension @Inject constructor(project: Project)
     this.baselineFile.disallowChanges()
   }
 
+  public fun configFile(configFile: RegularFile) {
+    this.configFile.set(configFile)
+    this.configFile.disallowChanges()
+  }
+
   public fun configFile(configFile: File) {
     this.configFile.set(configFile)
     this.configFile.disallowChanges()
@@ -78,6 +90,11 @@ public abstract class GradleGuardExtension @Inject constructor(project: Project)
   public fun configFile(configFile: String) {
     this.configFile.set(layout.projectDirectory.file(configFile))
     this.configFile.disallowChanges()
+  }
+
+  public fun outputFile(outputFile: Provider<RegularFile>) {
+    this.outputFile.set(outputFile)
+    this.outputFile.disallowChanges()
   }
 
   public fun outputFile(outputFile: File) {
