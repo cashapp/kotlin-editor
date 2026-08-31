@@ -19,6 +19,10 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
+    # TestKit publishes for testing, and testing is configured to always sign, so we need this to sign
+    env:
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SECRET_PASSPHRASE }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout the repo
