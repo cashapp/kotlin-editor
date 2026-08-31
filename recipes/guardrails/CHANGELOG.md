@@ -1,5 +1,8 @@
 # Gradle Guard
 
+## Version 0.4.0
+* [feat]: Add `app.cash.gradle-guard` Gradle plugin, wrapping the CLI.
+
 ## Version 0.3.1
 * [fix]: merge `BaselineConfig`s more intelligently. Stop crashing.
 
