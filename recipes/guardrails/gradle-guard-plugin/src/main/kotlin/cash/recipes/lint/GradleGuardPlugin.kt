@@ -55,7 +55,9 @@ public abstract class GradleGuardPlugin : Plugin<Project> {
       t.gradleGuardProgram.setFrom(resolvable)
       t.mode.set("baseline")
 
-      t.baselineFile.set(extension.baselineFile)
+      // when in baseline mode, we should not treat the baseline file as a baseline but as a place to write the new
+      // baseline. This ensures that running this task re-generates the baseline and doesn't leave stale output.
+      t.outputFile.set(extension.baselineFile)
       t.configFile.set(extension.configFile)
       t.outputFile.set(extension.outputFile)
 

@@ -2,6 +2,7 @@ package cash.recipes.lint.projects
 
 import com.autonomousapps.kit.GradleProject
 import com.autonomousapps.kit.gradle.Plugin
+import kotlin.io.path.writeText
 
 internal class ExtensionProject : AbstractProject("test-project") {
 
@@ -34,6 +35,13 @@ internal class ExtensionProject : AbstractProject("test-project") {
       .write()
   }
 
+  fun updateLibBuildScript(gradleProject: GradleProject) {
+    gradleProject
+      .projectDir("lib")
+      .resolve("build.gradle.kts")
+      .writeText("""tasks.register("foo")""")
+  }
+
   val expectedResult = """
     build.gradle.kts:1 has forbidden block plugins { … }
     build.gradle.kts:5 has forbidden block gradleGuard { … }
@@ -60,6 +68,25 @@ internal class ExtensionProject : AbstractProject("test-project") {
     |  allowed_prefixes:
     |  - "tasks.register(\"foo\")"
     |  - "val bar = \"1\""
+    |- path: "settings.gradle.kts"
+    |  allowed_blocks:
+    |  - "dependencyResolutionManagement"
+    |  - "pluginManagement"
+    |  allowed_prefixes:
+    |  - "include(\":lib\")"
+    |  - "rootProject.name = \"test-project\""
+    |
+  """.trimMargin()
+
+  val expectedRegeneratedBaseline = """
+    |baseline:
+    |- path: "build.gradle.kts"
+    |  allowed_blocks:
+    |  - "gradleGuard"
+    |  - "plugins"
+    |- path: "lib/build.gradle.kts"
+    |  allowed_prefixes:
+    |  - "tasks.register(\"foo\")"
     |- path: "settings.gradle.kts"
     |  allowed_blocks:
     |  - "dependencyResolutionManagement"
