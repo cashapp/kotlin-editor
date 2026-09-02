@@ -159,7 +159,7 @@ public abstract class GradleGuardTask @Inject constructor(
       } else {
         ""
       }
-      val pathText = shortPaths.joinToString(separator = " ", postfix = postfix)
+      val pathText = shortPaths.joinToString(separator = " ", prefix = " ", postfix = postfix)
 
       val printableOptions = options.joinToString(separator = " ", postfix = pathText)
       logger.lifecycle("Executing gradle-guard$ignoreFailureText:\n\n    gradle-guard $printableOptions\n")
