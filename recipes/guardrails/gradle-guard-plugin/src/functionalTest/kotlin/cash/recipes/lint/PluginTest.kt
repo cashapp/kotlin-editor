@@ -64,4 +64,30 @@ internal class PluginTest : AbstractFunctionalTest() {
     assertThat(baseline).exists()
     assertThat(baseline.readText()).isEqualTo(project.expectedBaseline)
   }
+
+  @Test
+  fun `can re-generate baseline`() {
+    // Given
+    val project = ExtensionProject()
+    val gradleProject = project.build()
+
+    // When
+    build(gradleProject.rootDir, ":gradleGuardBaseline", "--ignore-exclude")
+
+    // Then
+    val baseline = gradleProject.rootDir.resolve("baseline.yml")
+    assertThat(baseline).exists()
+    assertThat(baseline.readText()).isEqualTo(project.expectedBaseline)
+
+    // When we rewrite lib's build script and re-generate the baseline
+    project.updateLibBuildScript(gradleProject)
+    build(gradleProject.rootDir, ":gradleGuardBaseline", "--ignore-exclude")
+
+    // Then the baseline is re-generated
+    assertThat(baseline).exists()
+    assertThat(baseline.readText()).isEqualTo(project.expectedRegeneratedBaseline)
+
+    // Expect check to succeed (using the baseline)
+    build(gradleProject.rootDir, ":gradleGuardCheck", "--ignore-exclude", "--config=baseline.yml")
+  }
 }
