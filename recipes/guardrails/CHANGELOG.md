@@ -1,5 +1,9 @@
 # Gradle Guard
 
+## Version 0.4.1
+* [fix]: `gradleGuardBaseline` treats the baseline file as output.
+* [fix]: add space between options and paths in logging.
+
 ## Version 0.4.0
 * [feat]: Add `app.cash.gradle-guard` Gradle plugin, wrapping the CLI.
 
